@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 from db import init_db, mongo
 from register import register_bp
 from login import login_bp
-
+from chat import chat_bp
 
 import cohere
 import PyPDF2  # For PDF files
@@ -212,6 +212,8 @@ app.register_blueprint(register_bp)
 #login blueprint
 app.register_blueprint(login_bp)
 
+#chat blueprint
+app.register_blueprint(chat_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)

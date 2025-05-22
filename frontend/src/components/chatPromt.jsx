@@ -47,48 +47,46 @@ function App() {
   };
 
   // Helper to format mixed code/text response
-  function formatResponse(message) {
-    if (!message) return null;
+  const formatResponse = (text) => {
+    const codeRegex = /```(?:[a-z]*\n)?([\s\S]*?)```/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
 
-    const codeKeywords = ["#include", "main()", "::cout", "::cin", "int ", "return"];
-    const codeStartIndex = codeKeywords
-      .map((kw) => message.indexOf(kw))
-      .filter((index) => index !== -1)
-      .sort((a, b) => a - b)[0];
+    while ((match = codeRegex.exec(text)) !== null) {
+      const codeStart = match.index;
+      const codeEnd = codeRegex.lastIndex;
 
-    if (codeStartIndex !== undefined) {
-      const codePart = message.slice(codeStartIndex).trim();
-      const textPart = message.slice(0, codeStartIndex).trim();
+      if (lastIndex < codeStart) {
+        parts.push(
+          <p key={lastIndex} className="text-left whitespace-pre-wrap">
+            {text.slice(lastIndex, codeStart)}
+          </p>
+        );
+      }
 
-      return (
-        <>
-          {textPart && <p className="text-gray-800 mb-2">{textPart}</p>}
-          <pre className="bg-black text-green-400 p-3 rounded overflow-auto text-sm leading-relaxed whitespace-pre-wrap">
-            <code>{formatMultilineCode(codePart)}</code>
-          </pre>
-        </>
+      parts.push(
+        <pre
+          key={codeStart + "-code"}
+          className="bg-gray-800 text-white p-4 rounded my-2 overflow-auto text-left"
+        >
+          <code className="whitespace-pre">{match[1]}</code>
+        </pre>
+      );
+
+      lastIndex = codeEnd;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(
+        <p key="last" className="text-left whitespace-pre-wrap">
+          {text.slice(lastIndex)}
+        </p>
       );
     }
 
-    return <p className="text-gray-800">{message}</p>;
-  }
-
-  function formatMultilineCode(code) {
-    return code
-      .replace(/cppinclude|include/g, '#include')
-      .replace(/::/g, 'std::')
-      .replace(/main\s*\(\)/g, 'int main()')
-      .replace(/([^a-zA-Z])num1/g, '$1int num1')
-      .replace(/([^a-zA-Z])num2/g, '$1int num2')
-      .replace(/([^a-zA-Z])sum/g, '$1int sum')
-      .replace(/stdendl/g, 'std::endl')
-      .replace(/\b0;/g, 'return 0;')
-      .replace(/;/g, ';\n')
-      .replace(/{/g, '{\n')
-      .replace(/}/g, '\n}')
-      .replace(/\n{2,}/g, '\n')
-      .trim();
-  }
+    return parts;
+  };
 
   return (
     <div className="text-gray-600 body-font w-full">
@@ -131,7 +129,7 @@ function App() {
             {responseMessage && (
               <div className="mt-6 p-4 bg-gray-100 border border-gray-300 rounded">
                 <h3 className="font-semibold text-gray-900 mb-2">Response from server:</h3>
-                <p className="text-gray-900">{responseMessage}</p>
+                <p className="text-gray-900">{formatResponse(responseMessage)}</p>
               </div>
             )}
 
