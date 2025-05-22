@@ -1,10 +1,22 @@
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from db import init_db, mongo
+from register import register_bp
+from login import login_bp
+
+
 import cohere
 import PyPDF2  # For PDF files
 import docx  # For DOCX files
+import bcrypt
 import os
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "super-secret-key")   # Use env var in prod
+
+# Initialize DB
+init_db(app)
+jwt = JWTManager(app)
 
 # Enable CORS for the specific origins (localhost:5173 and localhost:8081)
 # CORS(app, resources={r"/*": {"origins": [" http://localhost:5173","http://localhost:8081"]}})
@@ -185,6 +197,20 @@ def summarize_email():
     except Exception as e:
         print(f"Error summarizing email: {e}")
         return jsonify({"error": "Failed to summarize email."}), 500
+    
+
+@app.route("/test")
+def test():
+    # List collection names to test DB connection
+    collections = mongo.db.list_collection_names()
+    return jsonify({"collections": collections})
+
+
+# Register Blueprints
+app.register_blueprint(register_bp)
+
+#login blueprint
+app.register_blueprint(login_bp)
 
 
 if __name__ == '__main__':

@@ -1,15 +1,7 @@
+// constants/Home.js
 export const navLinks = [
-    {
-      id: "blog",
-      title: "Blogs",
-    },
-    {
-      id: "team",
-      title: "Teams",
-    },
-    {
-      id: "connectWithUs",
-      title: "Contact Us",
-    },
-  ];
-  
+  { id: "chat", title: "Chat" },
+  { id: "local", title: "Local Chat" },
+  { id: "doc", title: "Doc Chat" },
+  { id: "email", title: "Email Summary" }
+];
