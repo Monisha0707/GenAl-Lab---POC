@@ -1,59 +1,127 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { close, menu } from "../assets/Home";
 import { navLinks } from "../constants/Home";
 import { Link } from "react-router-dom";
+import profilePic from "../assets/Home/profile.png";
 
 const Navbar = ({ active, setActive }) => {
   const [toggle, setToggle] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const isLoggedIn = true; // Replace with actual auth logic
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="w-full flex py-4 -mb-2 -mt-2 justify-between items-center navbar px-6 bg-white shadow-md">
-      <span className="ml-3 mt-2 text-xl text-black font-extrabold tracking-tight text-slate-900">
+    <nav
+      className={`w-full flex items-center justify-between px-8 mt-0 py-2 fixed top-0 left-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white bg-opacity-70 backdrop-blur-md shadow-md"
+          : "bg-transparent shadow-none"
+      }`}
+    >
+      {/* Brand */}
+      <span className="text-3xl font-extrabold text-black tracking-tight">
         OraChat
       </span>
 
-      <ul className="list-none sm:flex hidden justify-end items-center flex-1">
-        {navLinks.map((nav, index) => (
-          <li
-            key={nav.id}
-            className={`cursor-pointer text-[16px] font-bold ${
-              active === nav.id ? "text-green-600 font-extrabold" : "text-black"
-            } ${index === navLinks.length - 1 ? "mr-0" : "mr-10"}`}
-            onClick={() => setActive(nav.id)}
-          >
-            {nav.title}
-          </li>
-        ))}
-      </ul>
+      {/* Center Nav Links */}
+      <div className="hidden sm:flex flex-1 justify-center items-center">
+        <ul className="flex space-x-10">
+          {navLinks.map((nav) => (
+            <li
+              key={nav.id}
+              className={`cursor-pointer text-[20px] font-bold ${
+                active === nav.id ? "text-white font-extrabold" : "text-black"
+              }`}
+              onClick={() => setActive(nav.id)}
+            >
+              <Link to={`/${nav.id}`}>{nav.title}</Link>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-      <div className="sm:hidden flex flex-1 justify-end items-center">
+      {/* Right Section */}
+      <div className="hidden sm:flex items-center space-x-4">
+        {isLoggedIn ? (
+          <img
+            src={profilePic}
+            alt="Profile"
+            className="w-12 h-12 rounded-full cursor-pointer object-cover"
+          />
+        ) : (
+          <>
+            <Link to="/signin" className="text-blue-600 text-sm font-medium hover:underline">
+              Sign In
+            </Link>
+            <Link
+              to="/register"
+              className="text-sm bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+            >
+              Register
+            </Link>
+          </>
+        )}
+      </div>
+
+      {/* Mobile Menu */}
+      <div className="sm:hidden flex items-center">
         <img
           src={toggle ? close : menu}
           alt="menu"
-          className="w-[28px] h-[28px] object-contain"
+          className="w-[28px] h-[28px] object-contain cursor-pointer"
           onClick={() => setToggle(!toggle)}
         />
 
         <div
           className={`${
             !toggle ? "hidden" : "flex"
-          } p-6 bg-gray-100 absolute top-20 right-0 mx-4 my-2 min-w-[140px] rounded-xl sidebar`}
+          } absolute top-16 right-4 min-w-[180px] bg-white p-6 rounded-xl shadow-lg flex-col z-50`}
         >
-          <ul className="list-none flex justify-end items-start flex-1 flex-col">
-            {navLinks.map((nav, index) => (
+          <ul className="flex flex-col space-y-4">
+            {navLinks.map((nav) => (
               <li
                 key={nav.id}
                 className={`cursor-pointer text-[16px] font-bold ${
                   active === nav.id ? "text-green-600 font-extrabold" : "text-black"
-                } ${index === navLinks.length - 1 ? "mb-0" : "mb-4"}`}
+                }`}
                 onClick={() => {
                   setActive(nav.id);
                   setToggle(false);
                 }}
               >
-                {nav.title}
+                <Link to={`/${nav.id}`}>{nav.title}</Link>
               </li>
             ))}
+            <hr className="border-t mt-2" />
+            {isLoggedIn ? (
+              <li className="text-blue-600 font-semibold cursor-pointer">Profile</li>
+            ) : (
+              <>
+                <li>
+                  <Link to="/signin" className="text-blue-600 font-medium">Sign In</Link>
+                </li>
+                <li>
+                  <Link
+                    to="/register"
+                    className="bg-blue-600 text-white px-3 py-1 rounded-md"
+                  >
+                    Register
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

@@ -3,6 +3,7 @@ from db import mongo
 from werkzeug.security import check_password_hash
 import jwt
 import datetime
+from bson import ObjectId
 
 login_bp = Blueprint("login", __name__)
 
@@ -19,7 +20,7 @@ def login():
 
         user_collection = mongo.db.user
         user = user_collection.find_one({"email": data["email"]})
-
+        print("User found:", user)  # Debugging line to check user retrieval
         if not user:
             return jsonify({"error": "User not found"}), 404
 
@@ -33,11 +34,12 @@ def login():
             "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         }, SECRET_KEY, algorithm="HS256")
 
-        # Return token and user info in JSON
+        # ✅ Include user ID in the response (convert ObjectId to string)
         return jsonify({
             "message": "Login successful!",
             "token": token,
-            "email": user["email"]
+            "email": user["email"],
+            "userID": str(user["_id"])
         }), 200
 
     except Exception as e:

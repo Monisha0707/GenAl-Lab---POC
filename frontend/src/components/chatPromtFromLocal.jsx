@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 
+
 function ChatPromptFromLocal() {
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const [responseTime, setResponseTime] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const startTime = Date.now();
     const message = prompt.trim();
     if (!message) {
       alert("Please enter a message.");
@@ -45,34 +47,33 @@ for (let i = 0; i < history.length; i += 2) {
 
 fullPrompt += `User: ${prompt}`;
 
-      console.log("Sending prompt to LLM:", fullPrompt);
-
       // Step 3: Send prompt to local LLM
-      const llmRes = await fetch("http://localhost:11434/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "llama3",
-          prompt: fullPrompt,
-          stream: false,
-        }),
-      });
+    const llmRes = await fetch("http://localhost:5000/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ prompt: message }), // ✅ Only current user prompt
+});
+// const result = await llmRes.json();
+const llmData = await llmRes.json();
+console.log(llmData.response); // Display or use response
 
       if (!llmRes.ok) {
         throw new Error("Failed to get LLM response");
       }
 
-      const llmData = await llmRes.json();
-
+      
+      
       if (!llmData.response) {
         throw new Error("Invalid LLM response format");
       }
 
       const llmResponse = llmData.response;
 
-      setResponse(llmResponse);
+     setResponse(llmResponse.text);
+      console.log("✅ Set response:", llmResponse);
 
-      // Step 4: Save message and LLM response to backend
+      const endTime = Date.now(); // ⏱️ End time
+      setResponseTime(endTime - startTime);
       const saveRes = await fetch("http://localhost:5000/localChat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,45 +99,94 @@ fullPrompt += `User: ${prompt}`;
 
   // Function to detect and format code blocks
   const formatResponse = (text) => {
-    const codeRegex = /```(?:[a-z]*\n)?([\s\S]*?)```/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
+  const codeRegex = /```(?:[a-z]*\n)?([\s\S]*?)```/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
 
-    while ((match = codeRegex.exec(text)) !== null) {
-      const codeStart = match.index;
-      const codeEnd = codeRegex.lastIndex;
+  // Helper to render the text with bold + vertical line + rest below
+  const renderBoldWithBelow = (line) => {
+  // Bold word regex
+  const boldRegex = /\*\*(.+?)\*\*/;
+  const m = line.match(boldRegex);
 
-      if (lastIndex < codeStart) {
-        parts.push(
-          <p key={lastIndex} className="text-left whitespace-pre-wrap">
-            {text.slice(lastIndex, codeStart)}
-          </p>
-        );
-      }
+  if (!m) {
+    // Check if line is a bullet point starting with "* "
+    if (line.trimStart().startsWith("* ")) {
+      // Split bullet from text
+      const trimmed = line.trimStart();
+      const bulletText = trimmed.slice(2); // after "* "
 
-      parts.push(
-        <pre
-          key={codeStart + "-code"}
-          className="bg-gray-800 text-white p-4 rounded my-2 overflow-auto text-left"
-        >
-          <code className="whitespace-pre">{match[1]}</code>
-        </pre>
-      );
-
-      lastIndex = codeEnd;
-    }
-
-    if (lastIndex < text.length) {
-      parts.push(
-        <p key="last" className="text-left whitespace-pre-wrap">
-          {text.slice(lastIndex)}
+      return (
+        <p className="text-left whitespace-pre-wrap">
+          <strong>•</strong> {bulletText}
         </p>
       );
     }
+    // No bold or bullet - render normally
+    return <p className="text-left whitespace-pre-wrap">{line}</p>;
+  }
 
-    return parts;
-  };
+  const boldWord = m[1];
+  const beforeBold = line.slice(0, m.index);
+  const afterBold = line.slice(m.index + m[0].length).trimStart();
+
+  return (
+    <div key={Math.random()} className="mb-3">
+      {/* Bold word on first line */}
+      <p className="font-bold">{boldWord}</p>
+
+      {/* vertical line only, no colon, and the rest on next line */}
+      <div className="flex items-start">
+        <div
+          className="mr-2 font-mono"
+          style={{ lineHeight: 1.5, fontWeight: "bold" }}
+        >
+          |
+        </div>
+        <div>{beforeBold + afterBold}</div>
+      </div>
+    </div>
+  );
+};
+
+  while ((match = codeRegex.exec(text)) !== null) {
+    const codeStart = match.index;
+    const codeEnd = codeRegex.lastIndex;
+
+    if (lastIndex < codeStart) {
+      // process plain text before code block, line by line
+      const plainText = text.slice(lastIndex, codeStart);
+      const lines = plainText.split("\n");
+
+      lines.forEach((line, idx) => {
+        parts.push(renderBoldWithBelow(line));
+      });
+    }
+
+    parts.push(
+      <pre
+        key={codeStart + "-code"}
+        className="bg-gray-800 text-white p-4 rounded my-2 overflow-auto text-left"
+      >
+        <code className="whitespace-pre">{match[1]}</code>
+      </pre>
+    );
+
+    lastIndex = codeEnd;
+  }
+
+  if (lastIndex < text.length) {
+    const trailingText = text.slice(lastIndex);
+    const lines = trailingText.split("\n");
+
+    lines.forEach((line, idx) => {
+      parts.push(renderBoldWithBelow(line));
+    });
+  }
+
+  return parts;
+};
 
   return (
     <div className="text-gray-600 body-font w-full">
@@ -169,9 +219,17 @@ fullPrompt += `User: ${prompt}`;
 
           {response && (
             <div className="mt-6 p-5 bg-gray-100 border border-gray-300 rounded-lg">
-              <h3 className="font-semibold text-gray-900 mb-2">Response:</h3>
-              {formatResponse(response)}
-            </div>
+  <div className="flex justify-between items-center mb-2">
+    <h3 className="font-semibold text-gray-900">Response:</h3>
+    {responseTime !== null && (
+      <p className="text-sm text-gray-900">
+        ⏱️ Response Time: {(responseTime / 1000).toFixed(2)} sec
+      </p>
+    )}
+  </div>
+  {formatResponse(response)}
+</div>
+
           )}
         </div>
       </div>

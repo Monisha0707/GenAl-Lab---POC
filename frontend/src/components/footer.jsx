@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
         {/* Left Section: Logo / Name */}
         <div className="mb-4 md:mb-0">
-          <h2 className="text-xl font-bold">Oracle</h2>
+          <h2 className="text-xl font-bold">OraChat</h2>
           <p className="text-sm">Empowering your AI journey &copy; {new Date().getFullYear()}</p>
         </div>
 
@@ -31,13 +31,10 @@ const Footer = () => {
 
         {/* Right Section: Social Icons */}
         <div className="flex space-x-4">
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">
-            Twitter
-          </a>
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">
+          <a href="https://www.linkedin.com/in/vivek-kumar-b078911b9/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">
             LinkedIn
           </a>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">
+          <a href="https://github.com/Vivek7282" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">
             GitHub
           </a>
         </div>

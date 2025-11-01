@@ -8,6 +8,7 @@ import PrivateRoute from "./components/PrivateRoute"; // your new file
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "./redux/features/authSlice"; // your Redux slice
+import Home from "./pages/Home.jsx"; // Assuming you have a Home component
 // import { loginSuccess } from "./redux/features/userSlice";
 
 const ProtectedRoute = ({ children }) => {
@@ -33,12 +34,18 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/home" element={
-          <ProtectedRoute>
+        
+        <Route path="/local" element={
+          
             <HomePage />
-          </ProtectedRoute>
+    
+        } />
+        <Route path="/home" element={
+          
+            <Home />
+         
         } />
       </Routes>
     </BrowserRouter>

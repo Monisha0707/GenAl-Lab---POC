@@ -1,0 +1,81 @@
+
+import axios from "axios";
+export const generateLLMResponse = async (message) => {
+  try {
+     const response = await fetch("http://localhost:11434/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "llama3",
+          prompt: message,
+          stream: false,
+        }),
+      });
+    if (!response.ok) {
+      throw new Error("Failed to get LLM response");
+    }
+    const data = await response.json();
+    const llmResponse =
+      typeof data === "string"
+        ? data
+        : data.response || data.output || "No response";
+
+    return llmResponse;
+  } catch (err) {
+    console.error("Error while generating LLM response:", err);
+    throw err;
+  }
+};
+
+
+// const API_BASE = "http://localhost:5000/api/chat"; // adjust if deployed
+
+// // Save message + response
+// export const saveChat = async (user, message, response) => {
+//   await fetch(`${API_BASE}/save`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ user, message, response }),
+//   });
+// };
+
+// // Get chats for a session/user
+// export const getChats = async (user) => {
+//   const res = await fetch(`${API_BASE}/${user}`);
+//   return res.json();
+// };
+
+// // Clear all chats
+// export const clearChats = async (user) => {
+//   await fetch(`${API_BASE}/clear/${user}`, { method: "DELETE" });
+// };
+
+
+// src/utils/chatUtils/chatapi.js
+ 
+
+const API_BASE = "http://localhost:5000/api/chat";
+
+export const saveChat = async (user, session_id, message, response) => {
+  try {
+    await axios.post("http://localhost:5000/api/chat/save", {
+      user,
+      session_id,
+      message,
+      response,
+    });
+  } catch (err) {
+    console.error("❌ Failed to save chat:", err);
+  }
+};
+
+
+export const getChats = async (user, session_id) => {
+  const res = await axios.get(`${API_BASE}/${user}/${session_id}`);
+  return res.data;
+};
+
+export const endSession = async (user, session_id) => {
+  const res = await axios.post(`${API_BASE}/end/${user}/${session_id}`);
+  return res.data;
+};
