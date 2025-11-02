@@ -50,19 +50,23 @@ const App = () => {
 
   return (
     <>
-    <div className="fixed  mt-0px w-full z-50">
-  <Navbar active={activeComponent} setActive={setActiveComponent} />
-</div>
-<div className="min-h-screen bg-gradient-to-br from-violet-100 via-blue-100 to-teal-100 p-6 animate-fade-in">
-  <Navbar active={activeComponent} setActive={setActiveComponent} />
+  {/* 🧭 Fixed Navbar */}
+  <div className="fixed top-0 left-0 w-full z-50">
+    <Navbar active={activeComponent} setActive={setActiveComponent} />
+  </div>
 
+  {/* 🌈 Fixed Fullscreen Container */}
+  <div className="h-screen w-full bg-gradient-to-br from-violet-100 via-blue-100 to-teal-100 flex flex-col pt-[60px] pb-[20px] overflow-hidden">
+    {/* The Chat area stays visible, no scrolling */}
+    <div className="flex-1 flex items-center justify-center px-6">
+      <ChatPromtFromLocal />
+    </div>
+  {/* 
   <div className="mt-[0px] mb-[10px]">
-    
+     
     <HomePageLayout>
       <div className="w-full max-w-6xl mx-0 p-10">
-        {/* <ChatPromtFromLocal /> */}
         {renderComponent()}
-
         <div className="message-box mt-6 p-4 bg-white rounded shadow text-center">
           <h3 className="font-semibold mb-2 text-black">
             Message from Flask Backend: {message}
@@ -71,10 +75,10 @@ const App = () => {
       </div>
     </HomePageLayout>
   </div>
-
-  <div className="mt-20">
+*/}
+  {/* <div className="mt-20">
     <Footer />
-  </div>
+  </div> */}
 </div>
 
     

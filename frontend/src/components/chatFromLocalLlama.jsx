@@ -159,7 +159,7 @@ Respond naturally and consistently.
   return (
   <div className="text-gray-600 body-font w-full flex h-screen">
     {/* 🧭 Sidebar */}
-    <div className="w-64 bg-gray-900 text-white p-2 rounded-l-2xl flex flex-col shadow-inner">
+    <div className="w-56 h-[84vh] bg-gray-900 mt-10 text-white p-2 rounded-2xl flex flex-col shadow-inner">
       {/* Sidebar Header */}
       <h2 className="text-xl font-semibold mb-4 text-center border-b border-gray-700 pb-2">
         💬 Sessions
@@ -206,11 +206,11 @@ Respond naturally and consistently.
     </div>
 
     {/* 💬 Main Chat Area */}
-    <div className="flex-1 w-full p-1">
-      <div className="border-2 border-gray-200 p-2 h-full rounded-r-2xl bg-stone-50 shadow-inner">
+    <div className="flex-1 w-full p-1 mt-8 rounded-2xl">
+      <div className="border-2 border-gray-200 p-2 h-full rounded-r-2xl bg-stone-50 shadow-inner rounded-2xl">
         {messages.length === 0 ? (
           // 🌟 Initial Welcome Screen
-          <div className="text-center space-y-4 py-20">
+          <div className="text-center space-y-4 py-0">
             <h1 className="md:text-3xl text-2xl font-medium title-font text-gray-900 italic">
               Welcome to OraChat
             </h1>
@@ -219,17 +219,27 @@ Respond naturally and consistently.
             </p>
 
             <form
-  onSubmit={handleSubmit}
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleSubmit(e);
+  }}
   className="mt-6 flex items-end space-x-3 border border-gray-300 rounded-2xl bg-white p-3 shadow-sm hover:shadow-md transition-all"
 >
   <textarea
-    value={prompt}
-    onChange={(e) => setPrompt(e.target.value)}
-    className="flex-1 min-h-[50px] max-h-[180px] p-3 rounded-xl border-none resize-none focus:outline-none text-gray-800 bg-transparent placeholder-gray-400"
-    placeholder="Message OraChat..."
-    rows={1}
-    disabled={loading}
-  />
+  value={prompt}
+  onChange={(e) => setPrompt(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // stop newline
+      handleSubmit(e); // submit form
+    }
+  }}
+  className="flex-1 min-h-[50px] max-h-[180px] p-3 rounded-xl border-none resize-none focus:outline-none text-gray-800 bg-transparent placeholder-gray-400"
+  placeholder="Message OraChat..."
+  rows={1}
+  disabled={loading}
+/>
+
   <button
     type="submit"
     className={`px-4 py-2 rounded-xl text-white font-medium transition-colors duration-300 ${
@@ -245,7 +255,7 @@ Respond naturally and consistently.
           </div>
         ) : (
           <>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 ">
               <h1 className="text-2xl font-medium text-gray-900 italic">
                 OraChat
               </h1>
@@ -260,7 +270,7 @@ Respond naturally and consistently.
             {/* Chat container */}
 <div
   ref={chatContainerRef}
-  className="h-[75vh] overflow-y-auto bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
+  className="h-[55vh] overflow-y-auto bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
 >
   {messages.map((msg, i) => (
     <div
@@ -284,24 +294,28 @@ Respond naturally and consistently.
 
 
             {/* Input */}
-            <form onSubmit={handleSubmit} className="mt-4">
+            <form onSubmit={(e) => {
+    e.preventDefault();
+    handleSubmit(e);
+  }} className="mt-2">
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                className="w-full p-3 border border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-800 text-white"
-                rows={3}
+                className="w-full p-2 border border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-800 text-white"
+                rows={2}
                 placeholder="Ask something..."
                 disabled={loading}
                 onKeyDown={(e) => {
-      if (e.key === "Enter") {
-        e.preventDefault(); // optional to avoid page reload
-        handleSubmit(e);
-      }
-    }}
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // stop newline
+      handleSubmit(e); // submit form
+    }
+  }}
+
               />
               <button
                 type="submit"
-                className={`mt-4 px-6 py-2 rounded-lg text-white transition-colors duration-300 ${
+                className={`mt-2 px-6 py-2 rounded-lg text-white transition-colors duration-300 ${
                   loading
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-teal-500 hover:bg-teal-600"
@@ -313,7 +327,7 @@ Respond naturally and consistently.
             </form>
 
             {responseTime !== null && (
-              <p className="text-sm text-gray-500 mt-2 text-center">
+              <p className="text-sm text-gray-500 mt-0 text-center">
                 ⏱️ {(responseTime / 1000).toFixed(2)} sec
               </p>
             )}

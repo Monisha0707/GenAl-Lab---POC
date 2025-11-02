@@ -48,11 +48,12 @@ export const formatResponse = (text) => {
     return (
       <div
         key={Math.random()}
-        className="mb-3 bg-gray-100 text-gray-100 px-3 py-2 rounded-md"
+        className="mb-3 bg-gray-900 text-gray-100 px-3 py-2 rounded-md"
       >
         <p className="font-bold text-white">{boldWord}</p>
         <div className="flex items-start mt-1">
-          <div className="mr-2 font-mono font-bold text-teal-900">|</div>
+          {/* <div className="mr-2 font-mono font-bold text-teal-900">|</div> */}
+          <div className="mr-2 text-lg font-bold text-gray-100">•</div>
           <div>{beforeBold + afterBold}</div>
         </div>
       </div>
