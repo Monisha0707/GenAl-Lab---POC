@@ -56,10 +56,10 @@ const App = () => {
 <div className="min-h-screen bg-gradient-to-br from-violet-100 via-blue-100 to-teal-100 p-6 animate-fade-in">
   <Navbar active={activeComponent} setActive={setActiveComponent} />
 
-  <div className="mt-[90px] mb-[10px]">
+  <div className="mt-[0px] mb-[10px]">
     
     <HomePageLayout>
-      <div className="w-full max-w-6xl mx-auto">
+      <div className="w-full max-w-6xl mx-0 p-10">
         {/* <ChatPromtFromLocal /> */}
         {renderComponent()}
 

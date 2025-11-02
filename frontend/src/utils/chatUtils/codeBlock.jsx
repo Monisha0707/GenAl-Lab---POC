@@ -21,8 +21,8 @@ const CodeBlock = ({ language, value }) => {
       color: "#ffffff", // bright white text
       borderRadius: "8px",
       padding: "14px",
-      fontSize: "0.95rem",
-      lineHeight: "1.5",
+      fontSize: "0.75rem",
+      lineHeight: "1.2",
     },
     'code[class*="language-"]': {
       ...oneDark['code[class*="language-"]'],

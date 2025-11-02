@@ -31,7 +31,7 @@ const Navbar = ({ active, setActive }) => {
       }`}
     >
       {/* Brand */}
-      <span className="text-3xl font-extrabold text-black tracking-tight">
+      <span className="text-xl font-extrabold text-black tracking-tight">
         OraChat
       </span>
 

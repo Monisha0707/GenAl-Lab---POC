@@ -27,6 +27,25 @@ export const generateLLMResponse = async (message) => {
   }
 };
 
+// export const generateLLMResponse = async (message) => {
+//   try {
+//     const response = await fetch("http://localhost:5000/api/chat", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ message }),
+//     });
+
+//     if (!response.ok) throw new Error("Failed to get LLM response");
+
+//     const data = await response.json();
+//     return data.response;
+//   } catch (err) {
+//     console.error("Error while generating LLM response:", err);
+//     throw err;
+//   }
+// };
+
+
 
 // const API_BASE = "http://localhost:5000/api/chat"; // adjust if deployed
 
@@ -79,3 +98,11 @@ export const endSession = async (user, session_id) => {
   const res = await axios.post(`${API_BASE}/end/${user}/${session_id}`);
   return res.data;
 };
+
+// 🗂️ Get all sessions for a user (chat history list)
+export const getAllSessions = async (userId) => {
+  const res = await axios.get(`${API_BASE}/sessions/${userId}`);
+  return res.data;
+};
+
+

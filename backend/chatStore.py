@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Flask, Blueprint, request, jsonify
 from db import mongo
 import uuid
 from datetime import datetime
+from llm_utils import llm, memory
 
 chat_bp = Blueprint("chat_bp", __name__)
 MAX_CONTEXT_MESSAGES = 10
@@ -58,3 +59,61 @@ def end_session(user, session_id):
         {"$set": {"active": False, "ended_at": datetime.utcnow()}},
     )
     return jsonify({"success": True, "message": "Session ended"}), 200
+
+app = Flask(__name__)
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    try:
+        data = request.get_json()
+        user_message = data.get("message", "")
+
+        if not user_message:
+            return jsonify({"error": "No message provided"}), 400
+
+        # 🧠 Add user message to memory
+        memory.chat_memory.add_user_message(user_message)
+
+        # 🧩 Get the summarized conversation so far
+        context = memory.load_memory_variables({}).get("history", "")
+
+        # 🗣️ Combine with user prompt
+        prompt = f"{context}\nUser: {user_message}\nAI:"
+
+        # 🚀 Get LLM response from Ollama
+        response = llm(prompt)
+
+        # 💾 Add AI message to memory
+        memory.chat_memory.add_ai_message(response)
+
+        return jsonify({"response": response})
+
+    except Exception as e:
+        print(f"Error in /api/chat: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+
+@chat_bp.route("/api/chat/sessions/<user>", methods=["GET"])
+def get_all_sessions(user):
+    try:
+        sessions = mongo.db.chat_sessions.find({"user": user})
+        session_list = []
+        print(sessions)
+        print("testing")
+        for s in sessions:
+            session_list.append({
+                "session_id": s.get("session_id"),
+                "created_at": s.get("created_at"),
+                "chat_history": s.get("chat_history", []),
+                "active": bool(s.get("active")),  # Ensure it's a boolean
+                "last_message": (
+                    s["chat_history"][-1].get("question", "")
+                    if s.get("chat_history") else ""
+                ),
+            })
+
+        return jsonify(session_list), 200
+
+    except Exception as e:
+        print(f"Error fetching sessions: {e}")
+        return jsonify({"error": str(e)}), 500
+

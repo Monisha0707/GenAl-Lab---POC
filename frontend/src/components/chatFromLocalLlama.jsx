@@ -5,6 +5,7 @@ import {
   saveChat,
   getChats,
   endSession,
+  getAllSessions,
 } from "../utils/chatUtils/chatapi.js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -28,9 +29,10 @@ function ChatPromptFromLocal() {
         const data = await getChats(userId, sessionId); // GET /api/chat/:user/:session_id
         if (Array.isArray(data)) {
           const msgs = data.flatMap((msg) => [
-            { role: "user", text: msg.message },
-            { role: "bot", text: msg.response },
-          ]);
+  { role: "user", text: msg.message || msg.question || "" },
+  { role: "bot", text: msg.response || msg.answer || "" },
+]);
+
           setMessages(msgs);
         } else {
           setMessages([]);
@@ -46,10 +48,49 @@ function ChatPromptFromLocal() {
   }
 }, [messages]);
 
+// 🗂️ Session chat
+const [sessions, setSessions] = useState([]);
+
+useEffect(() => {
+  (async () => {
+    const allSessions = await getAllSessions(userId);
+    setSessions(allSessions);
+  })();
+}, []);
+
+// 🧭 Select a session to view chat
+const handleSessionSelect = async (id) => {
+  setSessionId(id);
+  localStorage.setItem("ora_session_id", id);
+  const selected = sessions.find((s) => s.session_id === id);
+  if (selected?.chat_history) {
+    const msgs = selected.chat_history.flatMap((m) => [
+  { role: "user", text: m.message || m.question || "" },
+  { role: "bot", text: m.response || m.answer || "" },
+]);
+
+    setMessages(msgs);
+  } else {
+    setMessages([]);
+  }
+};
+
+
+// 🆕 Start new chat session
+const handleNewSession = async () => {
+  const newSession = uuidv4();
+  setSessionId(newSession);
+  localStorage.setItem("ora_session_id", newSession);
+  setMessages([]);
+  console.log("🆕 Started new session:", newSession);
+};
+
+
   // 🧹 End session
   const handleClear = async () => {
     try {
-      await endSession(userId, sessionId); // POST /api/chat/end/:user/:session_id
+      const allSessions = await getAllSessions(userId);
+      setSessions(allSessions);
       const newSession = uuidv4();
       setSessionId(newSession);
       localStorage.setItem("ora_session_id", newSession);
@@ -116,85 +157,173 @@ Respond naturally and consistently.
 };
 
   return (
-    <div className="text-gray-600 body-font w-full">
-      <div className="w-full p-1">
-        <div className="border-2 border-gray-200 p-6 h-full rounded-2xl bg-stone-50 shadow-inner">
-          <h1 className="md:text-3xl text-2xl font-medium title-font text-gray-900 mb-2 text-center italic">
-            Welcome to OraChat
-          </h1>
-          <p className="text-center text-sm text-gray-400 mb-6">
-            This chat uses a local LLaMA model for AI responses.
-          </p>
+  <div className="text-gray-600 body-font w-full flex h-screen">
+    {/* 🧭 Sidebar */}
+    <div className="w-64 bg-gray-900 text-white p-2 rounded-l-2xl flex flex-col shadow-inner">
+      {/* Sidebar Header */}
+      <h2 className="text-xl font-semibold mb-4 text-center border-b border-gray-700 pb-2">
+        💬 Sessions
+      </h2>
 
-          {/* 🧹 End Session Button */}
-          <div className="flex justify-end mb-2">
+      {/* Scrollable Sessions */}
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+        {sessions.length === 0 ? (
+          <p className="text-gray-400 text-sm text-center">No sessions yet</p>
+        ) : (
+          sessions.map((s, idx) => (
             <button
-              onClick={handleClear}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors"
-            >
-              End Session
-            </button>
-          </div>
-
-          {/* 💬 Chat History */}
-          <div
-  ref={chatContainerRef}
-  className="h-96 overflow-y-auto bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700"
->
-
-            {messages.length === 0 && (
-              <p className="text-gray-400 text-center">
-                Start a conversation below 👇
-              </p>
-            )}
-
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`p-3 rounded-lg max-w-[80%] ${
-                  msg.role === "user"
-                    ? "bg-teal-600 text-white self-end ml-auto"
-                    : "bg-gray-700 text-gray-100 self-start mr-auto"
-                }`}
-              >
-                {msg.role === "bot" ? formatResponse(msg.text) : msg.text}
-              </div>
-            ))}
-          </div>
-
-          {/* ✍️ Input Form */}
-          <form onSubmit={handleSubmit} className="mt-4">
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-800 text-white"
-              rows={4}
-              placeholder="Enter your prompt..."
-              disabled={loading}
-            />
-            <button
-              type="submit"
-              className={`mt-4 px-6 py-2 rounded-lg text-white transition-colors duration-300 ${
-                loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-teal-500 hover:bg-teal-600"
+              key={s.session_id}
+              onClick={() => handleSessionSelect(s.session_id)}
+              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                s.session_id === sessionId
+                  ? "bg-teal-600 text-white"
+                  : "bg-gray-800 hover:bg-gray-700"
               }`}
-              disabled={loading}
             >
-              {loading ? "Generating..." : "Ask OraChat"}
+              <div className="flex flex-col">
+                <span className="font-semibold">Session {idx + 1}</span>
+                <span className="text-gray-300 text-xs truncate">
+                  {s.last_message || "No messages yet"}
+                </span>
+                {/* {s.created_at && (
+                  <span className="text-gray-400 text-xs">
+                    {new Date(s.created_at).toLocaleString()}
+                  </span>
+                )} */}
+              </div>
             </button>
-          </form>
+          ))
+        )}
+      </div>
 
-          {/* 🕓 Response Time */}
-          {responseTime !== null && (
-            <p className="text-sm text-gray-500 mt-2 text-center">
-              ⏱️ {(responseTime / 1000).toFixed(2)} sec
+      {/* New Session Button */}
+      <button
+        onClick={handleNewSession}
+        className="mt-4 bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg text-sm"
+      >
+        ➕ New Session
+      </button>
+    </div>
+
+    {/* 💬 Main Chat Area */}
+    <div className="flex-1 w-full p-1">
+      <div className="border-2 border-gray-200 p-2 h-full rounded-r-2xl bg-stone-50 shadow-inner">
+        {messages.length === 0 ? (
+          // 🌟 Initial Welcome Screen
+          <div className="text-center space-y-4 py-20">
+            <h1 className="md:text-3xl text-2xl font-medium title-font text-gray-900 italic">
+              Welcome to OraChat
+            </h1>
+            <p className="text-gray-400 text-sm">
+              Your local LLaMA model is ready to chat.
             </p>
-          )}
-        </div>
+
+            <form
+  onSubmit={handleSubmit}
+  className="mt-6 flex items-end space-x-3 border border-gray-300 rounded-2xl bg-white p-3 shadow-sm hover:shadow-md transition-all"
+>
+  <textarea
+    value={prompt}
+    onChange={(e) => setPrompt(e.target.value)}
+    className="flex-1 min-h-[50px] max-h-[180px] p-3 rounded-xl border-none resize-none focus:outline-none text-gray-800 bg-transparent placeholder-gray-400"
+    placeholder="Message OraChat..."
+    rows={1}
+    disabled={loading}
+  />
+  <button
+    type="submit"
+    className={`px-4 py-2 rounded-xl text-white font-medium transition-colors duration-300 ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-teal-500 hover:bg-teal-600"
+    }`}
+    disabled={loading}
+  >
+    {loading ? "..." : "Send"}
+  </button>
+</form>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-2xl font-medium text-gray-900 italic">
+                OraChat
+              </h1>
+              <button
+                onClick={handleClear}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors"
+              >
+                End Session
+              </button>
+            </div>
+
+            {/* Chat container */}
+<div
+  ref={chatContainerRef}
+  className="h-[75vh] overflow-y-auto bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
+>
+  {messages.map((msg, i) => (
+    <div
+      key={i}
+      className={`flex w-full ${
+        msg.role === "user" ? "justify-end" : "justify-start"
+      }`}
+    >
+      <div
+        className={`px-4 py-3 rounded-2xl text-sm md:text-base leading-relaxed break-words shadow-sm max-w-[75%] ${
+          msg.role === "user"
+            ? "bg-teal-600 text-white rounded-br-none"
+            : "bg-gray-700 text-gray-100 rounded-bl-none"
+        }`}
+      >
+        {msg.role === "bot" ? formatResponse(msg.text) : msg.text}
       </div>
     </div>
-  );
+  ))}
+</div>
+
+
+            {/* Input */}
+            <form onSubmit={handleSubmit} className="mt-4">
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="w-full p-3 border border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-800 text-white"
+                rows={3}
+                placeholder="Ask something..."
+                disabled={loading}
+                onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        e.preventDefault(); // optional to avoid page reload
+        handleSubmit(e);
+      }
+    }}
+              />
+              <button
+                type="submit"
+                className={`mt-4 px-6 py-2 rounded-lg text-white transition-colors duration-300 ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-teal-500 hover:bg-teal-600"
+                }`}
+                disabled={loading}
+              >
+                {loading ? "Generating..." : "Ask OraChat"}
+              </button>
+            </form>
+
+            {responseTime !== null && (
+              <p className="text-sm text-gray-500 mt-2 text-center">
+                ⏱️ {(responseTime / 1000).toFixed(2)} sec
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
 }
 
 export default ChatPromptFromLocal;
