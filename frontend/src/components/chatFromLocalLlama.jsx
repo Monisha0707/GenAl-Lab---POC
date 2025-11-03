@@ -118,20 +118,24 @@ function ChatPromptFromLocal() {
         .join("\n");
 
       const fullPrompt = `
-You are a friendly and expressive AI assistant continuing a conversation.
+You are Nova, a friendly and expressive AI assistant who is also an expert coder and explainer.
 
 Guidelines:
-- Respond with natural emotions and tone.
-- Include **appropriate emojis** that match the context (e.g., 😊, 💡, 🚀, 🤔, 🎉, 👀, 😂, 🤣, 💥, 🌟, 🏆, 🚀, 👽, 🤖, 💻, 📱, 🕰️, 🔴, 🛸, 👸, 🎁).
-- Keep responses concise but warm and engaging.
-- Maintain context from the previous messages.
+- Maintain a warm, human tone with natural emotion.
+- Use suitable emojis (😊, 💡, 🚀, 🤔, 🎯, 🧩) to add life, but keep responses professional when explaining code.
+- When answering coding or technical questions:
+  • Provide clear, well-commented examples.
+  • Explain reasoning step-by-step.
+  • Use best practices and mention edge cases if relevant.
+- When chatting casually, keep it concise, warm, and engaging.
+- Maintain continuity using the previous conversation context.
 
-Here is the previous context:
+Here’s the previous context:
 ${contextString}
 
 Now the user says: ${prompt.trim()}
 
-Respond naturally, emotionally, and with suitable emojis.
+Respond naturally, emotionally, and intelligently, adapting your tone based on whether it’s technical or conversational.
 `;
 
       const llmResponse = await generateLLMResponse(fullPrompt);
@@ -155,7 +159,7 @@ Respond naturally, emotionally, and with suitable emojis.
   return (
     <div className="text-gray-600 body-font w-full flex h-screen">
       {/* Sidebar */}
-      <div className="w-56 h-[88vh] bg-gray-900 mt-2 text-white p-2 rounded-2xl flex flex-col shadow-inner">
+      <div className="w-56 h-[90vh] bg-gray-900 mt-2 text-white p-2 rounded-2xl flex flex-col shadow-inner">
         <h2 className="text-xl font-semibold mb-4 text-center border-b border-gray-700 pb-2">
           💬 Chats History
         </h2>
@@ -194,8 +198,8 @@ Respond naturally, emotionally, and with suitable emojis.
       </div>
 
       {/* Main Chat Area */}
-      <div className="h-[90vh] flex-1 w-full p-1 mt-0 rounded-2xl">
-        <div className="border-2 border-gray-200 p-2 h-full rounded-2xl bg-gray-700 shadow-inner">
+      <div className="h-[92vh] flex-1 w-full p-1 mt-0 rounded-2xl">
+        <div className="border-2 border-gray-200 p-2 h-full rounded-2xl bg-gray-800 shadow-inner">
           {messages.length === 0 ? (
             // Welcome screen
             <div className="text-center space-y-4 py-0">
@@ -243,21 +247,23 @@ Respond naturally, emotionally, and with suitable emojis.
           ) : (
             <>
               <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-medium text-gray-100 italic">
+  <div></div>
+                {/* <h1 className="text-3xl font-medium text-gray-100 italic">
                   OraChat
-                </h1>
+                </h1> */}
                 <button
-                  onClick={handleClear}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors"
-                >
-                  End Session
-                </button>
+    onClick={handleClear}
+    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors"
+  >
+    End Session
+  </button>
+
               </div>
 
               {/* Chat Container */}
               <div
                 ref={chatContainerRef}
-                className="h-[65vh] overflow-y-auto ont-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
+                className="h-[69vh] mt-[-10px] overflow-y-auto font-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
               >
                 {messages.map((msg, i) => (
                   <div

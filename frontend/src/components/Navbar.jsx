@@ -24,14 +24,14 @@ const Navbar = ({ active, setActive }) => {
 
   return (
     <nav
-      className={`w-full flex items-center justify-between px-8 mt-0 py-2 fixed top-0 left-0 z-50 transition-all duration-300 ${
+      className={`w-full flex items-center justify-between px-8 mt-0 py-1 fixed top-0 left-0 z-50 transition-all duration-300 ${
         scrolled
           ? "bg-white bg-opacity-70 backdrop-blur-md shadow-md"
           : "bg-transparent shadow-none"
       }`}
     >
       {/* Brand */}
-      <span className="text-xl font-extrabold text-black tracking-tight">
+      <span className="text-2xl font-extrabold text-black tracking-tight">
         OraChat
       </span>
 

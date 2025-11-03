@@ -59,7 +59,7 @@ const App = () => {
   </div>
 
   {/* 🌈 Fixed Fullscreen Container */}
-  <div className="h-screen w-full bg-gradient-to-br from-violet-100 via-blue-100 to-teal-100 flex flex-col pt-[60px] pb-[20px] overflow-hidden">
+  <div className="h-screen w-full bg-gradient-to-br from-violet-100 via-blue-100 to-teal-100 flex flex-col pt-[54px] pb-[10px] overflow-hidden">
     {/* The Chat area stays visible, no scrolling */}
     <div className="flex-1 flex items-center justify-center px-6">
       <ChatPromtFromLocal />
