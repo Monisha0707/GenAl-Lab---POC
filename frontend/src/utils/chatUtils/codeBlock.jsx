@@ -9,7 +9,7 @@ const CodeBlock = ({ language, value }) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500); // fixed 1.5s, not 150s 🙂
+    setTimeout(() => setCopied(false), 15000); // fixed 15s, not 150s 🙂
   };
 
   // 🔹 Custom style override for brighter code
@@ -19,8 +19,8 @@ const CodeBlock = ({ language, value }) => {
       ...oneDark['pre[class*="language-"]'],
       // background: "#1e1e1e", // darker background for contrast
       color: "#ffffff", // bright white text
-      borderRadius: "8px",
-      padding: "14px",
+      borderRadius: "2px",
+      padding: "12px",
       fontSize: "0.75rem",
       lineHeight: "1.2",
     },

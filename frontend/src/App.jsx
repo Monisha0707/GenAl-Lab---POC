@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from "./redux/features/authSlice"; // your Redux slice
 import Home from "./pages/Home.jsx"; // Assuming you have a Home component
 // import { loginSuccess } from "./redux/features/userSlice";
-
+import EmbeddingManager from "./components/EmbeddingManager.jsx";
 const ProtectedRoute = ({ children }) => {
   const email = useSelector((state) => state.user.email);
   if (!email) {
@@ -45,6 +45,11 @@ export default function App() {
         <Route path="/home" element={
           
             <Home />
+         
+        } />
+        <Route path="/embedding" element={
+          
+            <EmbeddingManager />
          
         } />
       </Routes>

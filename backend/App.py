@@ -240,15 +240,22 @@ from flask import Flask
 from flask_cors import CORS
 from db import init_db
 from chatStore import chat_bp
+from embeddings.routes import embedding_bp
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
+CORS(app,
+     resources={r"/*": {"origins": "http://localhost:5173"}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 init_db(app)
 
-# Register blueprint
+# Register blueprints
 app.register_blueprint(chat_bp)
+app.register_blueprint(embedding_bp, url_prefix="/embeddings")
 
 if __name__ == "__main__":
     app.run(debug=True)
+

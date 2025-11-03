@@ -10,6 +10,7 @@ import SummarizeEmail from "../components/EmailSummarized.jsx";
 import AddExpanse from "../components/AddExpanse.jsx";
 import { BASE_URL } from "../Service/helper.js";
 import Footer from "../components/footer.jsx"
+import EmbeddingManager from "../components/EmbeddingManager.jsx";
 
 
 
@@ -37,6 +38,8 @@ const App = () => {
     
       case "local":
         return <ChatPromtFromLocal />;
+      case "embedding":
+      return <EmbeddingManager />;
       case "doc":
         return <DocChatPromt />;
       case "email":
