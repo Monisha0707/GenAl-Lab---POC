@@ -6,7 +6,7 @@ export const generateLLMResponse = async (message) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "llama3",
+          model: "llama3.2:latest",
           prompt: message,
           stream: false,
         }),

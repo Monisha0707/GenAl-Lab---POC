@@ -7,6 +7,8 @@ import {
   getChats,
   getAllSessions,
 } from "../utils/chatUtils/chatapi.js";
+import { ArrowUp } from "lucide-react";
+
 
 function ChatPromptFromLocal() {
   const [prompt, setPrompt] = useState("");
@@ -159,7 +161,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
   return (
     <div className="text-gray-600 body-font w-full flex h-screen">
       {/* Sidebar */}
-      <div className="w-56 h-[90vh] bg-gray-900 mt-2 text-white p-2 rounded-2xl flex flex-col shadow-inner">
+      <div className="w-56 h-[91vh] bg-gray-800 mt-2 text-white p-1 rounded-xl flex flex-col shadow-inner">
         <h2 className="text-xl font-semibold mb-4 text-center border-b border-gray-700 pb-2">
           💬 Chats History
         </h2>
@@ -198,7 +200,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
       </div>
 
       {/* Main Chat Area */}
-      <div className="h-[92vh] flex-1 w-full p-1 mt-0 rounded-2xl">
+      <div className="h-[93vh] flex-1 w-full p-1 mt-0 rounded-xl">
         <div className="border-2 border-gray-200 p-2 h-full rounded-2xl bg-gray-800 shadow-inner">
           {messages.length === 0 ? (
             // Welcome screen
@@ -263,30 +265,31 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
               {/* Chat Container */}
               <div
                 ref={chatContainerRef}
-                className="h-[69vh] mt-[-10px] overflow-y-auto font-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
+                className="h-[74vh] mt-[-10px] overflow-y-auto font-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
               >
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`flex  ${
-                      msg.role === "user"
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`px-4 py-3 rounded-2xl text-sm font-size-0.75rem md:text-sm leading-relaxed break-words shadow-sm max-w-[75%] ${
-                        msg.role === "user"
-                          ? "bg-teal-600 text-white rounded-br-none"
-                          : "bg-gray-700 text-gray-100 rounded-bl-none"
-                      }`}
-                    >
-                      {msg.role === "bot"
-                        ? formatResponse(msg.text)
-                        : msg.text}
-                    </div>
-                  </div>
-                ))}
+               {messages.map((msg, i) => (
+  <div
+    key={i}
+    className={`flex ${
+      msg.role === "user" ? "justify-end" : "justify-start"
+    }`}
+  >
+    <div
+      className={`px-4 py-3 rounded-2xl text-sm md:text-sm leading-relaxed break-words shadow-sm max-w-[70%] whitespace-pre-wrap
+        ${
+          msg.role === "user"
+            ? "bg-teal-600 text-white rounded-br-none mr-2"
+            : "bg-gray-700 text-gray-100 rounded-bl-none ml-[10%]"
+        }`}
+    >
+      {msg.role === "bot"
+        ? formatResponse(msg.text)
+        : msg.text}
+    </div>
+  </div>
+))}
+
+
               </div>
 
               {/* Input */}
@@ -304,21 +307,27 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
                     }
                   }}
                   className="flex-1 p-2 bg-transparent text-white resize-none focus:outline-none placeholder-gray-400"
-                  rows={2}
+                  rows={1}
                   placeholder="Ask something..."
                   disabled={loading}
                 />
                 <button
-                  type="submit"
-                  className={`ml-2 px-4 py-2 mr-4 rounded-md text-white transition-colors duration-300 ${
-                    loading
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-teal-500 hover:bg-teal-600"
-                  }`}
-                  disabled={loading}
-                >
-                  {loading ? "..." : "Send"}
-                </button>
+  type="submit"
+  className={`ml-2 mr-4 p-2 rounded-full flex items-center justify-center transition-colors duration-300 shadow-md
+    ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-teal-500 hover:bg-teal-600"
+    }`}
+  disabled={loading}
+>
+  {loading ? (
+    <span className="text-white text-sm">...</span>
+  ) : (
+    <ArrowUp size={18} className="text-white" />
+  )}
+</button>
+
               </form>
 
               {responseTime && (

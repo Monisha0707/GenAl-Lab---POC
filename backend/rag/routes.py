@@ -1,0 +1,82 @@
+# backend/rag/routes.py
+from flask import Blueprint, request, jsonify, current_app
+from rag.pdf_utils import extract_text_from_pdf_bytes
+from rag.rag_service import  query_kb
+import io
+
+rag_bp = Blueprint("rag_bp", __name__)
+
+@rag_bp.route("/create_kb", methods=["POST"])
+def create_kb():
+    """
+    Accepts multipart/form-data:
+      - file: pdf
+      - kb_name: string
+    """
+    try:
+        kb_name = request.form.get("kb_name")
+        file = request.files.get("file")
+        if not kb_name or not file:
+            return jsonify({"error": "kb_name and file are required"}), 400
+
+        pdf_bytes = file.read()
+        full_text, pages = extract_text_from_pdf_bytes(pdf_bytes)
+        stats = create_kb_and_store(kb_name, file.filename, full_text)
+        return jsonify({"message": "KB created", "stats": stats}), 200
+    except Exception as e:
+        current_app.logger.exception("create_kb error")
+        return jsonify({"error": str(e)}), 500
+
+@rag_bp.route("/list_kbs", methods=["GET"])
+def list_kbs():
+    """
+    Returns existing collections (KB names).
+    """
+    try:
+        import chromadb
+        from chromadb.config import Settings
+        client = chromadb.PersistentClient(path="./db/chroma")
+        cols = client.list_collections()
+        names = [c.name for c in cols]
+        return jsonify({"kbs": names}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@rag_bp.route("/query", methods=["POST"])
+def query():
+    """
+    JSON body: { kb_name: str, query: str, top_k: int (optional) }
+    """
+    data = request.get_json() or {}
+    kb_name = data.get("kb_name")
+    query_text = data.get("query")
+    top_k = int(data.get("top_k", 4))
+    if not kb_name or not query_text:
+        return jsonify({"error": "kb_name and query required"}), 400
+    try:
+        results = query_kb(kb_name, query_text, top_k=top_k)
+        return jsonify(results), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@rag_bp.route("/get_embeddings/<kb_name>", methods=["GET"])
+def get_embeddings(kb_name):
+    """
+    Debug endpoint to fetch stored embeddings for a KB.
+    """
+    try:
+        import chromadb
+        from chromadb.config import Settings
+        client = chromadb.PersistentClient(path="./db/chroma")
+        collection = client.get_collection(kb_name)
+
+        # Fetch a few items to inspect (with embeddings)
+        items = collection.get(limit=3, include=["embeddings"])
+        return jsonify({
+            "ids": items["ids"],
+            "metadatas": items["metadatas"],
+            "documents": items["documents"],
+            "embeddings": items["embeddings"]
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
