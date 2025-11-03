@@ -33,3 +33,6 @@ That server exposes all endpoints for both:
 /api/generate → for generating text (LLM)
 
 /api/embeddings → for generating embeddings (vector representation)
+
+
+![alt text](<Screenshot 2025-11-03 at 4.57.14 PM.png>) ![alt text](<Screenshot 2025-11-03 at 4.56.46 PM.png>)
