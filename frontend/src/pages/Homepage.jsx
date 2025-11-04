@@ -4,14 +4,17 @@ import styles from "../style";
 import HomePageLayout from "./DashbordLayout";
 import Navbar from "../components/Navbar.jsx";
 import ChatPromt from "../components/chatPromt.jsx";
-import ChatPromtFromLocal from "../components/chatFromLocalLlama.jsx";
+// is
 import DocChatPromt from "../components/DocChatPromt.jsx";
 import SummarizeEmail from "../components/EmailSummarized.jsx";
 import AddExpanse from "../components/AddExpanse.jsx";
 import { BASE_URL } from "../Service/helper.js";
 import Footer from "../components/footer.jsx"
 import EmbeddingManager from "../components/EmbeddingManager.jsx";
-
+import KBManager from "../components/KBManager.jsx";
+import OraChat from "../components/oraChat.jsx";
+import AskKB from "../components/AskKB.jsx";
+import RagChat from "../components/ragChat.jsx";
 
 
 
@@ -37,9 +40,15 @@ const App = () => {
     switch (activeComponent) {
     
       case "local":
-        return <ChatPromtFromLocal />;
+        return <OraChat />;
       case "embedding":
-      return <EmbeddingManager />;
+        return <EmbeddingManager />;
+      case "kb":
+        return <KBManager />;
+      case "askkb":
+        return <AskKB />;
+      case "ragChat":
+        return <RagChat />;
       case "doc":
         return <DocChatPromt />;
       case "email":
@@ -62,7 +71,8 @@ const App = () => {
   <div className="h-screen w-full bg-gray-700 bg-gradient-to-br from-violet-100 via-blue-100 to-teal-100 flex flex-col pt-[54px] pb-[10px] overflow-hidden">
     {/* The Chat area stays visible, no scrolling */}
     <div className="flex-1 flex items-center justify-center px-6">
-      <ChatPromtFromLocal />
+      {/* <ChatPromtFromLocal /> */}
+      {renderComponent()}
     </div>
   {/* 
   <div className="mt-[0px] mb-[10px]">

@@ -242,7 +242,7 @@ from db import init_db
 from chatStore import chat_bp
 from embeddings.routes import embedding_bp
 from rag.routes import rag_bp  # ✅ New RAG blueprint import
-
+from rag.rag_chat_routes import rag_chat_bp
 app = Flask(__name__)
 
 # ✅ Enable CORS for frontend
@@ -259,6 +259,6 @@ init_db(app)
 app.register_blueprint(chat_bp)
 app.register_blueprint(embedding_bp, url_prefix="/embeddings")
 app.register_blueprint(rag_bp, url_prefix="/rag")  # ✅ Register RAG routes
-
+app.register_blueprint(rag_chat_bp)  # ✅ Register RAG chat routes
 if __name__ == "__main__":
     app.run(debug=True)

@@ -105,4 +105,43 @@ export const getAllSessions = async (userId) => {
   return res.data;
 };
 
+export const getAllRagSessions = async (userId) => {
+  const res = await axios.get(`${API_BASE}/ragSessions/${userId}`);
+//   console.log("📂 Fetched RAG sessions:", res.data);
+  return res.data;
+};
 
+export const getRagChats = async (user, session_id) => {
+  const res = await axios.get(`${API_BASE}/ragChat/${user}/${session_id}`);
+  return res.data;
+};
+export const saveRagChat = async (user, session_id, message, response, citations = []) => {
+  try {
+    const res = await fetch("http://localhost:5000/api/ragchat/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user,
+        session_id,
+        message,
+        response,
+        citations, // ✅ new field
+      }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("❌ Error saving RAG chat:", err);
+  }
+};
+
+
+export const endRagSession = async (user, session_id) => {
+  const res = await axios.post(`${API_BASE}/end/${user}/${session_id}`);
+  return res.data;
+};
+
+
+export const deleteRagSession = async (user, session_id) => {
+  const res = await axios.delete(`${API_BASE}/ragchat/delete/${user}/${session_id}`);
+  return res.data;
+};

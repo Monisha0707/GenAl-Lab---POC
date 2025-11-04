@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function ChatPromptFromLocal() {
+function OraChat() {
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
@@ -236,4 +236,4 @@ function ChatPromptFromLocal() {
   );
 }
 
-export default ChatPromptFromLocal;
+export default OraChat;

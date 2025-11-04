@@ -117,3 +117,18 @@ def get_all_sessions(user):
         print(f"Error fetching sessions: {e}")
         return jsonify({"error": str(e)}), 500
 
+@chat_bp.route("/api/chat/delete", methods=["DELETE"])
+def delete_chat_session():
+    data = request.get_json()
+    user = data.get("user")
+    session_id = data.get("session_id")
+
+    if not user or not session_id:
+        return jsonify({"success": False, "message": "Missing user or session_id"}), 400
+
+    result = mongo.db.chat_sessions.delete_one({"user": user, "session_id": session_id})
+
+    if result.deleted_count > 0:
+        return jsonify({"success": True, "message": "Chat session deleted successfully"}), 200
+    else:
+        return jsonify({"success": False, "message": "No matching session found"}), 404

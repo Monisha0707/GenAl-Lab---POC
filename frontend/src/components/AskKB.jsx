@@ -1,4 +1,3 @@
-// src/components/AskKB.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -9,7 +8,6 @@ export default function AskKB() {
   const [results, setResults] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  // 🔹 Fetch available KBs on load
   useEffect(() => {
     (async () => {
       try {
@@ -22,7 +20,6 @@ export default function AskKB() {
     })();
   }, []);
 
-  // 🔹 Handle question query
   const handleQuery = async () => {
     if (!kb || !question) return alert("Select KB and ask a question");
     try {
@@ -40,15 +37,15 @@ export default function AskKB() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded shadow mt-6">
-      <h2 className="text-xl mb-4 font-semibold">Ask a KB</h2>
+    <div className="p-6 max-w-3xl mx-auto bg-gray-800 text-gray-100 rounded-xl shadow-lg mt-6">
+      <h2 className="text-2xl mb-4 font-semibold text-teal-400">Ask a Knowledge Base</h2>
 
-      {/* 🔹 KB Selector */}
-      <div className="mb-2">
+      {/* KB Selector */}
+      <div className="mb-3">
         <select
           value={kb}
           onChange={(e) => setKb(e.target.value)}
-          className="p-2 border rounded w-full"
+          className="p-2 border border-gray-600 rounded w-full bg-gray-700 text-gray-100 focus:ring-2 focus:ring-teal-500 outline-none"
         >
           <option value="">-- Select KB --</option>
           {kbs.map((k) => (
@@ -59,50 +56,80 @@ export default function AskKB() {
         </select>
       </div>
 
-      {/* 🔹 Question Box */}
+      {/* Question Input */}
       <textarea
         rows={3}
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border border-gray-600 rounded bg-gray-700 text-gray-100 focus:ring-2 focus:ring-teal-500 outline-none"
         placeholder="Ask something about the KB..."
       />
 
-      {/* 🔹 Submit Button */}
-      <div className="mt-2">
+      {/* Retrieve Button */}
+      <div className="mt-3">
         <button
           onClick={handleQuery}
-          className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+          className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-md transition duration-200"
         >
           Retrieve
         </button>
       </div>
 
-      {/* 🔹 Results Section */}
-      <div className="mt-4">
-        <h3 className="font-semibold mb-2">Answer</h3>
+      {/* Results */}
+      <div className="mt-6">
+        <h3 className="font-semibold mb-2 text-teal-400">Answer</h3>
 
         {results ? (
           <>
-            <div className="bg-green-50 border border-green-200 p-3 rounded text-gray-800">
+            <div className="bg-gray-700 border border-gray-600 p-3 rounded text-gray-100">
               {results.answer || "No answer generated"}
             </div>
 
+            {/* Similarity Results */}
+            {results.matches && results.matches.length > 0 && (
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2 text-teal-300">Top Similar Results</h4>
+                <div className="space-y-3">
+                  {results.matches.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 border border-gray-600 rounded bg-gray-700 hover:bg-gray-600 transition duration-200"
+                    >
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm text-gray-400 font-medium">
+                          Chunk {idx + 1}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          🔹 Similarity: {item.similarity?.toFixed(3) ?? "N/A"}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-100 whitespace-pre-line">
+                        {item.text}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Debug JSON */}
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="mt-2 text-sm text-blue-600 hover:underline"
+              className="mt-3 text-sm text-teal-400 hover:underline"
             >
-              {showDetails ? "Hide details ▲" : "Show full result ▼"}
+              {showDetails ? "Hide details ▲" : "Show full JSON ▼"}
             </button>
 
             {showDetails && (
-              <pre className="bg-gray-100 p-3 rounded mt-2 max-h-60 overflow-auto text-xs">
+              <pre className="bg-gray-900 border border-gray-700 p-3 rounded mt-2 max-h-60 overflow-auto text-xs text-gray-300">
                 {JSON.stringify(results, null, 2)}
               </pre>
             )}
           </>
         ) : (
-          <div className="bg-gray-100 p-3 rounded">No results yet</div>
+          <div className="bg-gray-700 border border-gray-600 p-3 rounded text-gray-300">
+            No results yet
+          </div>
         )}
       </div>
     </div>

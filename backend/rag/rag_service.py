@@ -3,6 +3,13 @@ import json
 import chromadb
 from chromadb.config import Settings
 
+# backend/rag/routes.py
+from flask import Blueprint, request, jsonify, current_app
+from rag.pdf_utils import extract_text_from_pdf_bytes
+# from rag.rag_service import  query_kb
+import io
+from datetime import datetime
+from db import mongo  # ✅ using your centralized Mongo connection
 # Initialize Chroma client (persistent vector DB)
 client = chromadb.PersistentClient(path="./db/chroma")
 
@@ -33,11 +40,10 @@ def query_kb(kb_name, query, top_k=3):
     1. Retrieve top relevant chunks using vector similarity.
     2. Build context prompt.
     3. Ask LLM (local Ollama) and return answer.
+    4. Include metadata for citations.
     """
-    # Step 1 — Get the KB collection
     collection = client.get_collection(kb_name)
 
-    # Step 2 — Retrieve top matching documents
     results = collection.query(
         query_texts=[query],
         n_results=top_k,
@@ -45,92 +51,89 @@ def query_kb(kb_name, query, top_k=3):
     )
 
     docs = results["documents"][0] if results["documents"] else []
+    metadatas = results["metadatas"][0] if results["metadatas"] else []
+    distances = results["distances"][0] if results["distances"] else []
+
+    if not docs:
+        return {
+            "query": query,
+            "matches": [],
+            "context_used": [],
+            "answer": "I'm sorry, but I don’t have any relevant information in the knowledge base to answer that."
+        }
+
     context = "\n\n".join(docs)
 
-    # Step 3 — Build a structured prompt
     prompt = f"""
-You are a knowledgeable and helpful AI assistant answering user questions based on the given context.
+    You are a Retrieval-Augmented Generation (RAG) assistant.
+    Use the provided context to accurately answer the question.
+    If the context lacks the answer, politely say so.
 
-Context:
-{context}
+    Context:
+    {context}
 
-User question:
-{query}
+    Question:
+    {query}
 
-Answer clearly and concisely, referencing the context when relevant.
-If the answer is not in the context, say so politely.
-"""
+    Answer:
+    """
 
-    # Step 4 — Query local LLM (Ollama)
-    answer = query_local_ollama(prompt)
+    answer = query_local_ollama(prompt).strip()
 
+    # Prepare matches with metadata for citation display
+    matches = []
+    for doc, meta, dist in zip(docs, metadatas, distances):
+        matches.append({
+            "page_content": doc,
+            "metadata": meta,
+            "similarity": round(1 - dist, 3)
+        })
+
+    # Return consistent structure
     return {
         "query": query,
-        "context_used": docs,
-        "answer": answer
+        "answer": answer,
+        "matches": matches,
+        "context_used": matches  # ✅ ADD THIS LINE
     }
 
 
-# backend/rag/routes.py
-from flask import Blueprint, request, jsonify, current_app
-from rag.pdf_utils import extract_text_from_pdf_bytes
-from rag.rag_service import  query_kb
-import io
+
+
 
 rag_bp = Blueprint("rag_bp", __name__)
 
-@rag_bp.route("/create_kb", methods=["POST"])
-def create_kb():
-    """
-    Accepts multipart/form-data:
-      - file: pdf
-      - kb_name: string
-    """
-    try:
-        kb_name = request.form.get("kb_name")
-        file = request.files.get("file")
-        if not kb_name or not file:
-            return jsonify({"error": "kb_name and file are required"}), 400
-
-        pdf_bytes = file.read()
-        full_text, pages = extract_text_from_pdf_bytes(pdf_bytes)
-        stats = create_kb_and_store(kb_name, file.filename, full_text)
-        return jsonify({"message": "KB created", "stats": stats}), 200
-    except Exception as e:
-        current_app.logger.exception("create_kb error")
-        return jsonify({"error": str(e)}), 500
-
-@rag_bp.route("/list_kbs", methods=["GET"])
-def list_kbs():
-    """
-    Returns existing collections (KB names).
-    """
-    try:
-        import chromadb
-        from chromadb.config import Settings
-        client = chromadb.PersistentClient(path="./db/chroma")
-        cols = client.list_collections()
-        names = [c.name for c in cols]
-        return jsonify({"kbs": names}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @rag_bp.route("/query", methods=["POST"])
 def query():
-    """
-    JSON body: { kb_name: str, query: str, top_k: int (optional) }
-    """
     data = request.get_json() or {}
     kb_name = data.get("kb_name")
     query_text = data.get("query")
     top_k = int(data.get("top_k", 4))
+
     if not kb_name or not query_text:
         return jsonify({"error": "kb_name and query required"}), 400
+
     try:
         results = query_kb(kb_name, query_text, top_k=top_k)
-        return jsonify(results), 200
+
+        # Extract citations from match metadata
+        citations = []
+        for m in results.get("matches", []):
+            meta = m.get("metadata", {})
+            src = meta.get("source") or meta.get("file_name") or "Unknown source"
+            citations.append(src)
+
+        return jsonify({
+            "answer": results.get("answer", "No answer generated"),
+            "matches": results.get("matches", []),
+            "citations": citations
+        }), 200
+
     except Exception as e:
+        current_app.logger.exception("Error in /query")
         return jsonify({"error": str(e)}), 500
+
 
 @rag_bp.route("/get_embeddings/<kb_name>", methods=["GET"])
 def get_embeddings(kb_name):
@@ -153,3 +156,42 @@ def get_embeddings(kb_name):
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+
+# @rag_bp.route("/api/ragChat", methods=["POST"])
+# def rag_chat():
+#     data = request.get_json() or {}
+#     query_text = data.get("query")
+#     kb_name = data.get("kb_name")
+
+#     if not query_text or not kb_name:
+#         return jsonify({"error": "query and kb_name are required"}), 400
+
+#     try:
+#         # Call your RAG function (must return context/docs)
+#         result = query_kb(kb_name, query_text, top_k=4)
+
+#         # Extract model output and context
+#         answer = result.get("answer") or result.get("output_text") or ""
+#         citations = result.get("context_used") or result.get("source_documents") or []
+
+#         # Optional: convert citations to readable text
+#         formatted_citations = []
+#         for doc in citations:
+#             if isinstance(doc, dict):
+#                 formatted_citations.append(doc.get("page_content", str(doc)))
+#             elif hasattr(doc, "page_content"):
+#                 formatted_citations.append(doc.page_content)
+#             else:
+#                 formatted_citations.append(str(doc))
+#         print("Formatted Citations:", formatted_citations)
+#         # ✅ Return both text and citations
+#         return jsonify({
+#             "role": "bot",
+#             "text": answer,
+#             "citations": formatted_citations
+#         }), 200
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500

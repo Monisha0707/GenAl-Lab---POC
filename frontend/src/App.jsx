@@ -11,6 +11,8 @@ import { loginSuccess } from "./redux/features/authSlice"; // your Redux slice
 import Home from "./pages/Home.jsx"; // Assuming you have a Home component
 import KBManager from "./components/KBManager.jsx";
 import AskKB from "./components/AskKB.jsx";
+import RagChat from "./components/ragChat.jsx";
+import OraChat from "./components/oraChat.jsx";
 // import { loginSuccess } from "./redux/features/userSlice";
 import EmbeddingManager from "./components/EmbeddingManager.jsx";
 const ProtectedRoute = ({ children }) => {
@@ -49,6 +51,11 @@ export default function App() {
             <Home />
          
         } />
+        <Route path="/chat" element={
+          
+            <OraChat />
+         
+        } />
         <Route path="/embedding" element={
           
             <EmbeddingManager />
@@ -59,6 +66,9 @@ export default function App() {
         } />
         <Route path="/askkb" element={
           <AskKB />
+        } />
+        <Route path="/RagChat" element={
+          <RagChat />
         } />
 
       </Routes>
