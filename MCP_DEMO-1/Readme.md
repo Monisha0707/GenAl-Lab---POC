@@ -1,8 +1,3 @@
-Perfect timing 😄 — let’s wrap this up neatly for you.
-Here’s a clean, professional **README.md** for your MCP (Model-Controlled Program) Server project.
-It explains what it does, how to set it up, run it, and even test it.
-
----
 
 ## 🧠 MCP Server — Local File Operation Agent
 
@@ -191,6 +186,4 @@ You can type commands like:
 **Vivek Kumar**
 🚀 Generative AI Engineer — Building Agentic Systems powered by LLMs
 
----
-
-Would you like me to also include a **“Quick Demo GIF”** section (e.g., showing a user typing “create test.py” and seeing it appear), or you want to keep it simple for now?
+![alt text](<Screenshot 2025-11-05 at 1.28.28 AM.png>) ![alt text](<Screenshot 2025-11-05 at 1.28.15 AM.png>)
