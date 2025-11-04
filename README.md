@@ -36,3 +36,5 @@ That server exposes all endpoints for both:
 
 
 ![alt text](<Screenshot 2025-11-03 at 4.57.14 PM.png>) ![alt text](<Screenshot 2025-11-03 at 4.56.46 PM.png>)
+
+![alt text](<Screenshot 2025-11-04 at 4.06.39 PM.png>) ![alt text](<Screenshot 2025-11-04 at 4.06.46 PM.png>) ![alt text](<Screenshot 2025-11-04 at 4.06.53 PM.png>) ![alt text](<Screenshot 2025-11-04 at 4.07.22 PM.png>) ![alt text](<Screenshot 2025-11-04 at 4.07.29 PM.png>) ![alt text](<Screenshot 2025-11-04 at 4.07.37 PM.png>) ![alt text](<Screenshot 2025-11-04 at 4.07.59 PM.png>) ![alt text](<Screenshot 2025-11-04 at 4.08.28 PM.png>)
