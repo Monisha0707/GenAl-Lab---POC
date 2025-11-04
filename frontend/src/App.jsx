@@ -13,6 +13,7 @@ import KBManager from "./components/KBManager.jsx";
 import AskKB from "./components/AskKB.jsx";
 import RagChat from "./components/ragChat.jsx";
 import OraChat from "./components/oraChat.jsx";
+import AgentPlayground from "./components/mcp.jsx";
 // import { loginSuccess } from "./redux/features/userSlice";
 import EmbeddingManager from "./components/EmbeddingManager.jsx";
 const ProtectedRoute = ({ children }) => {
@@ -69,6 +70,9 @@ export default function App() {
         } />
         <Route path="/RagChat" element={
           <RagChat />
+        } />
+        <Route path="/mcp" element={
+          <AgentPlayground />
         } />
 
       </Routes>

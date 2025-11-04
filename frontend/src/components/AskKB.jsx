@@ -143,7 +143,7 @@ export default function AskKB() {
                 {results.answer || "No answer generated"}
               </div>
 
-              {results.matches && results.matches.length > 0 && (
+              {/* {results.matches && results.matches.length > 0 && (
                 <div className="mt-4">
                   <h4 className="font-semibold mb-2 text-teal-300">
                     Top Similar Results
@@ -170,7 +170,7 @@ export default function AskKB() {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               <button
                 onClick={() => setShowDetails(!showDetails)}

@@ -98,7 +98,7 @@ export default function KBManager() {
           >
             <div className="flex items-center gap-2">
                       <Menu size={18} className="text-white" />
-                      <span className="text-sm  font-semibold">OraRagChat</span>
+                      <span className="text-sm  font-semibold">Knowledge base</span>
                     </div>
             {isCollapsed ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
           </button>
@@ -128,6 +128,12 @@ export default function KBManager() {
                 className="text-left text-sm bg-gray-700 hover:bg-gray-600 p-2 rounded-md"
               >
                 Ask KB
+              </button>
+              <button
+                onClick={() => navigate("/mcp")}
+                className="text-left text-sm bg-gray-700 hover:bg-gray-600 p-2 rounded-md"
+              >
+                MCP
               </button>
             </div>
           )}

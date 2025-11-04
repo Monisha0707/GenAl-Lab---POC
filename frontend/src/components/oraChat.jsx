@@ -239,6 +239,12 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
               >
                 Ask KB
               </button>
+              <button
+                onClick={() => navigate("/mcp")}
+                className="text-left text-sm bg-gray-700 hover:bg-gray-600 p-2 rounded-md"
+              >
+                MCP
+              </button>
         </div>
       )}
     </div>
