@@ -119,91 +119,174 @@ def create_file():
     data = request.get_json()
     filename = data.get("filename", "new_file.txt")
     content = data.get("content", "")
+    
+    # Define the directory where files will be created
+    directory = os.path.join(BASE_DIR, "Files")
+    print(f"BASE_DIR is: {BASE_DIR}")
+    print(f"Files will be created in: {directory}")
+    # Ensure the directory exists
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
-    if os.path.exists(filename):
-        return jsonify({"error": f"{filename} already exists"}), 400
+    # Create the full file path
+    file_path = os.path.join(directory, filename)
 
-    with open(filename, "w") as f:
+    # Check if the file already exists in the directory
+    if os.path.exists(file_path):
+        return jsonify({"error": f"{filename} already exists in the 'Files' directory."}), 400
+
+    # Write content to the file
+    with open(file_path, "w") as f:
         f.write(content)
 
-    return jsonify({"message": f"{filename} created successfully", "content": content})
+    return jsonify({"message": f"{filename} created successfully in 'Files' directory.", "content": content})
 
 
 @app.route("/delete-file", methods=["DELETE"])
 def delete_file():
     data = request.get_json()
-    filename = data.get("filename", "sample.txt")
+    filename = data.get("filename")
 
-    if not os.path.exists(filename):
-        return jsonify({"error": f"{filename} not found"}), 404
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
 
-    os.remove(filename)
+    directory = os.path.join(BASE_DIR, "Files")
+    file_path = os.path.join(directory, filename)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"{filename} not found in Files directory"}), 404
+
+    os.remove(file_path)
     return jsonify({"message": f"{filename} deleted successfully"})
+
 
 
 @app.route("/replace-content", methods=["POST"])
 def replace_content():
     data = request.get_json()
-    filename = data.get("filename", "sample.txt")
+    filename = data.get("filename")
     new_content = data.get("new_content", "")
 
-    if not os.path.exists(filename):
-        return jsonify({"error": f"{filename} not found"}), 404
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
 
-    with open(filename, "w") as f:
+    directory = os.path.join(BASE_DIR, "Files")
+    file_path = os.path.join(directory, filename)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"{filename} not found in Files directory"}), 404
+
+    with open(file_path, "w") as f:
         f.write(new_content)
 
-    return jsonify({"message": f"{filename} content replaced successfully"})
+    return jsonify({"message": f"{filename} content replaced successfully", "new_content": new_content})
+
 
 
 @app.route("/clear-file", methods=["POST"])
 def clear_file():
     data = request.get_json()
-    filename = data.get("filename", "sample.txt")
+    filename = data.get("filename")
 
-    if not os.path.exists(filename):
-        return jsonify({"error": f"{filename} not found"}), 404
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
 
-    open(filename, "w").close()
+    directory = os.path.join(BASE_DIR, "Files")
+    file_path = os.path.join(directory, filename)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"{filename} not found in Files directory"}), 404
+
+    open(file_path, "w").close()  # truncates the file
     return jsonify({"message": f"{filename} cleared successfully"})
 
+# @app.route("/read-file", methods=["GET"])
+# def read_file():
+#     filename = request.args.get("filename")  # The filename should be passed dynamically
+
+#     if not filename:
+#         return jsonify({"error": "Filename not provided"}), 400
+
+#     if not os.path.exists(filename):
+#         return jsonify({"error": f"{filename} not found"}), 404
+
+#     with open(filename, "r") as f:
+#         content = f.read()
+
+#     return jsonify({"filename": filename, "content": content})
 
 @app.route("/read-file", methods=["GET"])
 def read_file():
-    filename = request.args.get("filename", "sample.txt")
+    filename = request.args.get("filename")  # The filename should be passed dynamically
 
-    if not os.path.exists(filename):
-        return jsonify({"error": f"{filename} not found"}), 404
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
 
-    with open(filename, "r") as f:
+    directory = os.path.join(BASE_DIR, "Files")
+    file_path = os.path.join(directory, filename)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"{filename} not found in Files directory"}), 404
+
+    with open(file_path, "r") as f:
         content = f.read()
 
     return jsonify({"filename": filename, "content": content})
 
 
+@app.route("/get-files", methods=["GET"])
+def get_files():
+    directory = os.path.join(BASE_DIR, "Files")
+
+    # Ensure directory exists
+    if not os.path.exists(directory):
+        return jsonify({"files": []})  # return empty if no Files folder
+
+    # List only files (no folders)
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+
+    return jsonify({"files": files})
+
+
+
+
 @app.route("/update-file", methods=["POST"])
 def update_file():
     data = request.get_json()
-    filename = data.get("filename", "sample.txt")
+    filename = data.get("filename")
     mode = data.get("mode", "append")
+    content = data.get("content", "")
 
-    if not os.path.exists(filename):
-        open(filename, "w").close()
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+
+    directory = os.path.join(BASE_DIR, "Files")
+    file_path = os.path.join(directory, filename)
+
+    # Create file if it does not exist
+    if not os.path.exists(file_path):
+        with open(file_path, "w") as f:
+            f.write("")  # create empty file
 
     if mode == "append":
-        content = data.get("content", "")
-        with open(filename, "a") as f:
+        with open(file_path, "a") as f:
             f.write("\n" + content)
-        return jsonify({"message": "Content appended successfully!"})
+        return jsonify({
+            "message": "Content appended successfully!",
+            "filename": filename
+        })
 
     elif mode == "overwrite":
-        content = data.get("content", "")
-        with open(filename, "w") as f:
+        with open(file_path, "w") as f:
             f.write(content)
-        return jsonify({"message": "File overwritten successfully!"})
+        return jsonify({
+            "message": "File overwritten successfully!",
+            "filename": filename
+        })
 
     else:
         return jsonify({"error": "Unsupported mode"}), 400
+
 
 
 # ============================================================
