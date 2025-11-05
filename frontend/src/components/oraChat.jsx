@@ -192,7 +192,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
   return (
   <div className="text-gray-600 bg-gray-800 body-font w-full flex h-screen">
     {/* Sidebar */}
-    <div className="w-56 h-[99vh] bg-gray-800 mt-1 text-white p-1 rounded-xl flex flex-col shadow-inner border border-gray-100">
+    <div className="w-56 h-[99vh] bg-gray-900 mt-1 text-white p-1 rounded-xl flex flex-col shadow-inner ">
       <div className="mb-4">
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -249,7 +249,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
       )}
     </div>
 
-      <h2 className="text-sm mb-4 text-center border-b border-gray-700 pb-2">
+      <h2 className="text-sm mb-4 text-center  pb-2">
         💬 Chats History
       </h2>
 
@@ -298,7 +298,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
 
       <button
         onClick={handleNewSession}
-        className="mt-4 py-1 text-sm rounded-md bg-gray-700 hover:bg-gray-600 border border-gray-600"
+        className="mt-4 py-1 text-sm rounded-md bg-gray-700 hover:bg-gray-600 "
       >
          New Chat
       </button>
@@ -306,7 +306,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
 
     {/* Main Chat Area */}
     <div className="h-[100vh] flex-1 w-full p-1 mt-0 rounded-xl">
-      <div className="border-2 border-gray-200 p-2 h-full rounded-2xl bg-gray-800 shadow-inner">
+      <div className=" p-2 h-full rounded-2xl bg-gray-800 shadow-inner">
         {messages.length === 0 ? (
           // Updated Welcome Screen (Styled like RAG, but no KB)
           <div className="text-center space-y-6 flex flex-col items-center justify-center h-full">
@@ -318,10 +318,10 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
             </p>
 
             {/* Input area */}
-            <div className="w-full max-w-lg mt-10">
+            <div className="w-full max-w-lg  mt-10">
               <form
                 onSubmit={handleSubmit}
-                className="flex items-center space-x-0 border border-gray-600 rounded-2xl bg-gray-800 p-3 shadow-sm hover:shadow-md transition-all"
+                className="flex items-center space-x-0  rounded-2xl bg-gray-800 p-3 shadow-sm hover:shadow-md transition-all border border-gray-700"
               >
                 <textarea
                   value={prompt}
@@ -367,7 +367,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
             {/* Chat Container */}
             <div
               ref={chatContainerRef}
-              className="h-[80vh] mt-[-10px] overflow-y-auto font-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
+              className="h-[80vh] mt-[-10px] overflow-y-auto font-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3  flex flex-col"
             >
               {messages.map((msg, i) => (
                 <div
@@ -406,7 +406,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
                     handleSubmit(e);
                   }
                 }}
-                className="flex-1 p-2 bg-transparent text-white resize-none focus:outline-none placeholder-gray-400"
+                className="flex-1 p-2 bg-transparent text-white resize-none border border-gray-700 focus:outline-none placeholder-gray-400"
                 rows={1}
                 placeholder="Ask something..."
                 disabled={loading}

@@ -86,9 +86,9 @@ export default function KBManager() {
   };
 
   return (
-    <div className="body-font w-full flex h-screen bg-gray-900 text-gray-100">
+    <div className="body-font w-full flex h-screen bg-gray-800 text-gray-100">
       {/* 🔹 Sidebar */}
-      <div className="w-56 h-[100vh] bg-gray-800 mt-0 text-white p-2 rounded-xl flex flex-col shadow-inner border border-gray-100">
+      <div className="w-56 h-[100vh] bg-gray-900 mt-0 text-white p-2 rounded-xl flex flex-col shadow-inner ">
         
         {/* Collapsible Section */}
         <div className="mb-4">
@@ -184,7 +184,7 @@ export default function KBManager() {
       </div>
 
       {/* 🔹 Center Create/Add Box */}
-      <div className="flex flex-col items-center justify-center flex-1 p-1 mt-0 rounded-xl border-2">
+      <div className="flex flex-col items-center justify-center flex-1 p-1 mt-0 rounded-xl ">
         <div className="w-full max-w-lg bg-gray-800 shadow-xl rounded-2xl p-6 border border-gray-700">
           <h2 className="text-2xl font-semibold mb-6 text-center">
             {showAddFiles ? `Add Files to ${kbName}` : "Create Knowledge Base"}
@@ -205,7 +205,7 @@ export default function KBManager() {
               accept="application/pdf"
               multiple
               onChange={(e) => setFiles(Array.from(e.target.files))}
-              className="w-full border border-gray-600 p-2 rounded-md text-gray-100 bg-gray-700"
+              className="w-full  p-2 rounded-md text-gray-100 bg-gray-700"
             />
 
             {files.length > 0 && (
@@ -235,7 +235,7 @@ export default function KBManager() {
                     setShowAddFiles(false);
                     setKbName("");
                   }}
-                  className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 border border-gray-600"
+                  className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 "
                 >
                   Cancel
                 </button>

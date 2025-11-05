@@ -1,0 +1,21 @@
+Here's the sample file content:
+
+**sample.txt**
+
+---
+
+India, officially known as the Republic of India, is a country in South Asia. It is the seventh-largest country by area, the second-most populous country (behind China), and the most populous democracy in the world. Bounded by the Indian Ocean on the south, Pakistan to the west, Bangladesh and Nepal to the east, and Bhutan and China to the north, it has a long coastline along the Arabian Sea to the west and the Bay of Bengal to the east.
+
+India is home to over 2 billion people from diverse cultures, languages, and ethnic groups. The country's rich history spans more than 5,000 years, with various civilizations rising and falling on its landmass. From ancient Indus Valley civilization to the rise of the British Empire, India has experienced numerous invasions, migrations, and cultural exchanges that have shaped its unique identity.
+
+Today, India is a thriving democracy, with a growing economy and rapidly developing cities like Mumbai, Delhi, and Bengaluru. The country boasts some of the world's most impressive architectural wonders, such as the Taj Mahal, Red Fort, and Hampi temple complex. With over 22 official languages spoken across its states, India celebrates its rich linguistic diversity through vibrant festivals, mouth-watering cuisine, and a love for the arts.
+
+India has produced numerous Nobel laureates in physics (Rabindranath Tagore), chemistry (C.V.Raman), literature (Rabindranath Tagore, V.S. Naipaul), peace (Dalai Lama), medicine (Dr. Har Gobind Khorana), and economics (Amartya Sen). Its film industry, Bollywood, is one of the largest in the world, producing hundreds of movies every year.
+
+With a GDP growth rate averaging over 7% in recent years, India has emerged as a major economic power on the global stage. The country's IT industry, led by companies like Infosys and Wipro, is a significant contributor to its economy. Tourism also plays an essential role, with millions of international travelers flocking to see India's natural wonders (Kerala backwaters), ancient sites (Buddhist caves at Ajanta and Ellora), and vibrant cities.
+
+India's rich history, cultural diversity, breathtaking landscapes, warm hospitality, and incredible economic potential make it a fascinating country to explore. Come experience the magic of this extraordinary nation!
+
+---
+
+This file content provides an introduction to India as a country, its geography, people, culture, economy, achievements, and more. Feel free to modify or add content according to your needs!

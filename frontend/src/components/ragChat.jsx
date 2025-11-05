@@ -280,7 +280,7 @@ function BotMessageWithCitations({ msg }) {
   return (
     <div className="text-gray-600 body-font w-full flex h-screen bg-gray-800">
       {/* Sidebar */}
-      <div className="w-56 h-[99vh] bg-gray-800 mt-1 text-white p-1 rounded-xl flex flex-col shadow-inner border border-gray-100">
+      <div className="w-56 h-[99vh] bg-gray-900 mt-1 text-white p-1 rounded-xl flex flex-col shadow-inner ">
 <div className="mb-4">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -388,7 +388,7 @@ function BotMessageWithCitations({ msg }) {
 
       {/* Main Chat Area */}
       <div className="h-[100vh] flex-1 w-full p-1 mt-0 rounded-xl">
-        <div className="border-2 border-gray-200 p-2 h-full rounded-2xl bg-gray-800 shadow-inner">
+        <div className=" p-2 h-full rounded-2xl bg-gray-800 shadow-inner ">
 {messages.length === 0 ? (
   // Welcome screen + KB selection
   <div className="text-center space-y-6 flex flex-col items-center justify-center h-full">
@@ -421,7 +421,7 @@ function BotMessageWithCitations({ msg }) {
       <div className="w-full max-w-lg mt-10">
         <form
           onSubmit={handleSubmit}
-          className="flex items-center space-x-0 border border-gray-600 rounded-2xl bg-gray-800 p-3 shadow-sm hover:shadow-md transition-all"
+          className="flex items-center space-x-0  rounded-2xl bg-gray-800 p-3 shadow-sm hover:shadow-md transition-all border border-gray-700"
         >
           <textarea
             value={prompt}
@@ -488,7 +488,7 @@ function BotMessageWithCitations({ msg }) {
               {/* Chat Container */}
               <div
                 ref={chatContainerRef}
-                className="h-[80vh] mt-[-10px] overflow-y-auto font-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3 border border-gray-700 flex flex-col"
+                className="h-[80vh] mt-[-10px] overflow-y-auto font-size-0.75rem text-sm bg-gray-800 text-gray-100 p-4 rounded-lg space-y-3  flex flex-col"
               >
                 {messages.map((msg, i) => (
   <div
