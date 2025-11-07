@@ -2,7 +2,9 @@ from flask import Flask, Blueprint, jsonify, request, Response
 from bson.json_util import dumps
 from datetime import datetime
 from db import mongo
-from rag.rag_service import query_kb  # assuming your query_kb and query_local_ollama are here
+from rag.rag_service import (
+    query_kb,
+)  # assuming your query_kb and query_local_ollama are here
 from flask_cors import cross_origin
 
 rag_chat_bp = Blueprint("rag_chat_bp", __name__)
@@ -37,7 +39,7 @@ def save_rag_chat():
             "question": question,
             "answer": answer,
             "citations": citations,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         # ✅ Upsert logic — safely push to chat history without overwriting entire doc
@@ -51,9 +53,14 @@ def save_rag_chat():
                     "active": True,
                     "created_at": datetime.utcnow(),
                 },
-                "$push": {"rag_chat_history": {"$each": [new_entry], "$slice": -MAX_CONTEXT_MESSAGES}},
+                "$push": {
+                    "rag_chat_history": {
+                        "$each": [new_entry],
+                        "$slice": -MAX_CONTEXT_MESSAGES,
+                    }
+                },
             },
-            upsert=True
+            upsert=True,
         )
 
         return jsonify({"success": True, "message": "RAG chat saved successfully"}), 200
@@ -61,9 +68,6 @@ def save_rag_chat():
     except Exception as e:
         print(f"❌ Error saving RAG chat: {e}")
         return jsonify({"error": str(e)}), 500
-
-
-
 
 
 # 📜 Get all RAG chats for a given session
@@ -89,7 +93,6 @@ def get_rag_chats(user, session_id):
         return jsonify({"error": str(e)}), 500
 
 
-
 # 📋 Get all RAG sessions for a given user
 @rag_chat_bp.route("/api/chat/ragSessions/<user>", methods=["GET"])
 @cross_origin(origins="*")  # Allow all origins for dev
@@ -101,21 +104,24 @@ def get_all_rag_sessions(user):
 
         for s in sessions:
             history = s.get("rag_chat_history", [])
-            session_list.append({
-                "session_id": s.get("session_id"),
-                "kb_name": s.get("kb_name"),
-                "created_at": s.get("created_at"),
-                "active": bool(s.get("active")),
-                "rag_chat_history": [
-                    {
-                        "question": m.get("question", ""),
-                        "answer": m.get("answer", ""),
-                        "citations": m.get("citations", []),
-                        "timestamp": m.get("timestamp", "")
-                    } for m in history
-                ],
-                "last_message": history[-1].get("question", "") if history else "",
-            })
+            session_list.append(
+                {
+                    "session_id": s.get("session_id"),
+                    "kb_name": s.get("kb_name"),
+                    "created_at": s.get("created_at"),
+                    "active": bool(s.get("active")),
+                    "rag_chat_history": [
+                        {
+                            "question": m.get("question", ""),
+                            "answer": m.get("answer", ""),
+                            "citations": m.get("citations", []),
+                            "timestamp": m.get("timestamp", ""),
+                        }
+                        for m in history
+                    ],
+                    "last_message": history[-1].get("question", "") if history else "",
+                }
+            )
 
         print(f"📦 Returning {len(session_list)} sessions with consistent structure.")
         return jsonify(session_list), 200
@@ -139,6 +145,7 @@ def end_rag_session(user, session_id):
         print(f"❌ Error ending RAG session: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 @rag_chat_bp.route("/api/ragChat", methods=["POST", "OPTIONS"])
 @rag_chat_bp.route("/ragChat", methods=["POST", "OPTIONS"])
 @cross_origin(origins="*")
@@ -159,7 +166,9 @@ def rag_chat():
         # Step 1 — Query KB and LLM
         result = query_kb(kb_name, question, top_k=4)
 
-        answer = result.get("answer") or result.get("output_text", "No answer generated.")
+        answer = result.get("answer") or result.get(
+            "output_text", "No answer generated."
+        )
         context_used = result.get("context_used") or result.get("source_documents", [])
 
         # ✅ Step 2 — Format citations safely
@@ -202,17 +211,22 @@ def rag_chat():
         collection.insert_one(chat_doc)
 
         # Step 4 — Respond to frontend
-#         print("📘 DEBUG RESPONSE:", {
-#     "role": "bot",
-#     "text": answer,
-#     "citations": citations
-# })
+        #         print("📘 DEBUG RESPONSE:", {
+        #     "role": "bot",
+        #     "text": answer,
+        #     "citations": citations
+        # })
 
-        return jsonify({
-            "role": "bot",
-            "text": answer,
-            "citations": citations,
-        }), 200
+        return (
+            jsonify(
+                {
+                    "role": "bot",
+                    "text": answer,
+                    "citations": citations,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         print(f"[rag_chat ERROR] {e}")
@@ -220,17 +234,24 @@ def rag_chat():
 
 
 # 🗑️ Delete a RAG chat session
-@rag_chat_bp.route("/api/chat/ragchat/delete/<user>/<session_id>", methods=["DELETE", "OPTIONS"])
+@rag_chat_bp.route(
+    "/api/chat/ragchat/delete/<user>/<session_id>", methods=["DELETE", "OPTIONS"]
+)
 @cross_origin(origins="*")
 def delete_rag_session(user, session_id):
     if request.method == "OPTIONS":
         return jsonify({"status": "ok"}), 200
 
     try:
-        result = mongo.db.rag_chat_sessions.delete_one({"user": user, "session_id": session_id})
+        result = mongo.db.rag_chat_sessions.delete_one(
+            {"user": user, "session_id": session_id}
+        )
         if result.deleted_count == 0:
             return jsonify({"error": "Session not found"}), 404
-        return jsonify({"success": True, "message": "Session deleted successfully"}), 200
+        return (
+            jsonify({"success": True, "message": "Session deleted successfully"}),
+            200,
+        )
     except Exception as e:
         print(f"❌ Error deleting session: {e}")
         return jsonify({"error": str(e)}), 500

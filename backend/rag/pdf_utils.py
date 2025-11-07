@@ -1,5 +1,6 @@
 import fitz  # PyMuPDF
 
+
 def extract_text_from_pdf_bytes(pdf_bytes):
     """
     Extract text from a PDF byte stream using PyMuPDF (fitz).

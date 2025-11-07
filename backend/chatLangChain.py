@@ -2,6 +2,7 @@
 
 # from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
+
 # from langchain.chains import LLMChain
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate

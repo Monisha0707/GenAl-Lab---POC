@@ -1,7 +1,7 @@
 # backend/rag/routes.py
 from flask import Blueprint, request, jsonify, current_app
 from rag.pdf_utils import extract_text_from_pdf_bytes
-from rag.rag_service import  query_kb
+from rag.rag_service import query_kb
 import io
 
 rag_bp = Blueprint("rag_bp", __name__)
@@ -10,8 +10,10 @@ from flask import Blueprint, request, jsonify, current_app
 import os
 import chromadb
 from chromadb.utils import embedding_functions
+
 # from chromadb.config import Settings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 # from sentence_transformers import SentenceTransformer
 
 rag_bp = Blueprint("rag_bp", __name__)
@@ -20,7 +22,10 @@ rag_bp = Blueprint("rag_bp", __name__)
 client = chromadb.PersistentClient(path="./db/chroma")
 
 # Use a local embedding model (change to ollama or OpenAI if needed)
-embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+    model_name="all-MiniLM-L6-v2"
+)
+
 
 @rag_bp.route("/create_kb", methods=["POST"])
 def create_kb():
@@ -33,7 +38,9 @@ def create_kb():
         try:
             collection = client.get_collection(kb_name)
         except Exception:
-            collection = client.create_collection(name=kb_name, embedding_function=embedding_fn)
+            collection = client.create_collection(
+                name=kb_name, embedding_function=embedding_fn
+            )
 
         splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
         total_chunks = 0
@@ -46,25 +53,37 @@ def create_kb():
                 # 🧠 Generate embedding for the first chunk just for debugging
                 sample_embedding = embedding_fn([chunks[0]])[0]
                 print(f"🔍 Sample embedding for '{file.filename}' (first chunk):")
-                print(sample_embedding[:10], "...")  # print only first 10 dims for readability
+                print(
+                    sample_embedding[:10], "..."
+                )  # print only first 10 dims for readability
 
             ids = [f"{file.filename}_{i}" for i in range(len(chunks))]
-            metadatas = [{"source": file.filename, "chunk": i} for i in range(len(chunks))]
+            metadatas = [
+                {"source": file.filename, "chunk": i} for i in range(len(chunks))
+            ]
             collection.add(documents=chunks, ids=ids, metadatas=metadatas)
 
             total_chunks += len(chunks)
-            print(f"✅ Stored {len(chunks)} chunks (with embeddings) from {file.filename}")
+            print(
+                f"✅ Stored {len(chunks)} chunks (with embeddings) from {file.filename}"
+            )
 
-        return jsonify({
-            "message": f"KB '{kb_name}' updated successfully",
-            "files_uploaded": [f.filename for f in files],
-            "total_chunks": total_chunks
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": f"KB '{kb_name}' updated successfully",
+                    "files_uploaded": [f.filename for f in files],
+                    "total_chunks": total_chunks,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         current_app.logger.exception("create_kb error")
         return jsonify({"error": str(e)}), 500
-    
+
+
 @rag_bp.route("/delete_kb", methods=["POST"])
 def delete_kb():
     try:
@@ -101,6 +120,7 @@ def add_to_kb():
         # ✅ Get existing collection (must exist)
         collection = client.get_collection(kb_name)
         from langchain.text_splitter import RecursiveCharacterTextSplitter
+
         splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
 
         total_chunks = 0
@@ -108,27 +128,33 @@ def add_to_kb():
         for file in files:
             pdf_bytes = file.read()
             from rag.pdf_utils import extract_text_from_pdf_bytes
+
             text = extract_text_from_pdf_bytes(pdf_bytes)
             chunks = splitter.split_text(text)
 
             ids = [f"{file.filename}_{i}" for i in range(len(chunks))]
-            metadatas = [{"source": file.filename, "chunk": i} for i in range(len(chunks))]
+            metadatas = [
+                {"source": file.filename, "chunk": i} for i in range(len(chunks))
+            ]
 
             collection.add(documents=chunks, ids=ids, metadatas=metadatas)
 
             total_chunks += len(chunks)
             print(f"✅ {file.filename}: {len(chunks)} new chunks added to {kb_name}")
 
-        return jsonify({
-            "message": f"Added {len(files)} file(s) to KB '{kb_name}' successfully",
-            "total_chunks": total_chunks
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": f"Added {len(files)} file(s) to KB '{kb_name}' successfully",
+                    "total_chunks": total_chunks,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         current_app.logger.exception("add_to_kb error")
         return jsonify({"error": str(e)}), 500
-
-
 
 
 @rag_bp.route("/list_kbs", methods=["GET"])
@@ -139,12 +165,14 @@ def list_kbs():
     try:
         import chromadb
         from chromadb.config import Settings
+
         client = chromadb.PersistentClient(path="./db/chroma")
         cols = client.list_collections()
         names = [c.name for c in cols]
         return jsonify({"kbs": names}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @rag_bp.route("/query", methods=["POST"])
 def query():
@@ -163,6 +191,7 @@ def query():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @rag_bp.route("/get_embeddings/<kb_name>", methods=["GET"])
 def get_embeddings(kb_name):
     """
@@ -171,16 +200,22 @@ def get_embeddings(kb_name):
     try:
         import chromadb
         from chromadb.config import Settings
+
         client = chromadb.PersistentClient(path="./db/chroma")
         collection = client.get_collection(kb_name)
 
         # Fetch a few items to inspect (with embeddings)
         items = collection.get(limit=3, include=["embeddings"])
-        return jsonify({
-            "ids": items["ids"],
-            "metadatas": items["metadatas"],
-            "documents": items["documents"],
-            "embeddings": items["embeddings"]
-        }), 200
+        return (
+            jsonify(
+                {
+                    "ids": items["ids"],
+                    "metadatas": items["metadatas"],
+                    "documents": items["documents"],
+                    "embeddings": items["embeddings"],
+                }
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500

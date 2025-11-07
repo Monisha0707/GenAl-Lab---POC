@@ -19,20 +19,6 @@ def get_llm_route_decision(instruction: str):
     Ask Ollama (or any local LLM) to decide what REST route to call,
     based purely on the natural language instruction.
     """
-#     system_prompt = """You are a REST route decision engine for a file management server.
-# Given a natural language instruction, respond ONLY in JSON with one of the available endpoints.
-
-# Available routes:
-# - /create-file (POST): create a file → body: { "filename": "file.txt", "content"?: "optional content" }
-# - /delete-file (DELETE): delete a file → body: { "filename": "file.txt" }
-# - /read-file (GET): read file content → body: { "filename": "file.txt" }
-# - /update-file (POST): append/overwrite content → body: { "filename": "file.txt", "mode": "append" | "overwrite", "content": "text" }
-# - /replace-content (POST): replace entire file content → body: { "filename": "file.txt", "new_content": "text" }
-# - /clear-file (POST): erase file content → body: { "filename": "file.txt" }
-
-# Return valid JSON ONLY.
-# Do not include explanations, markdown formatting, or text outside JSON.
-# """
     system_prompt = """You are a REST route decision engine for a file management server.
     Given a natural language instruction, respond ONLY in JSON with one of the available endpoints.
 
@@ -52,46 +38,6 @@ def get_llm_route_decision(instruction: str):
     Return valid JSON ONLY. No explanations. No text outside JSON.
     """
 
-    # system_prompt = """
-    # You are a REST route decision engine for a file management server.
-    # Your job is to convert natural language instructions into JSON describing which REST API route should be called and with what parameters.
-
-    # You must return ONLY a JSON object — no explanations, no markdown, no extra text.
-
-    # Available routes:
-    # - /create-file (POST)
-    #     → Create a new file.
-    #     → body: { "filename": "file.txt", "content"?: "optional starting text" }
-
-    # - /delete-file (DELETE)
-    #     → Delete a file.
-    #     → body: { "filename": "file.txt" }
-
-    # - /read-file (GET)
-    #     → Read a file and return its content.
-    #     → body: { "filename": "file.txt" }
-
-    # - /update-file (POST)
-    #     → Append or overwrite content in an existing file.
-    #     → body: { "filename": "file.txt", "mode": "append" | "overwrite", "content": "text" }
-
-    # - /replace-content (POST)
-    #     → Replace the entire content of a file.
-    #     → body: { "filename": "file.txt", "new_content": "text" }
-
-    # - /clear-file (POST)
-    #     → Remove all content of an existing file.
-    #     → body: { "filename": "file.txt" }
-
-    # IMPORTANT:
-    # - If the instruction asks to *generate text*, *summarize*, *make notes*, *rewrite*, *expand*, or otherwise produce new wording → use `/update-file` (append or overwrite depending on phrasing).
-    # - If the user wants to completely rewrite the file from scratch → use `/replace-content`.
-    # - If the user wants to add on to what already exists → use `/update-file` with `"mode": "append"`.
-    # - If the user mentions "start fresh", "clear", or "empty" → use `/clear-file` before writing new content.
-    # - If the user wants to create a new file that doesn't exist → use `/create-file`.
-
-    # Return valid JSON ONLY.
-    # """
     payload = {
         "model": "llama3.1:latest",
         "prompt": f"{system_prompt}\nUser: {instruction}\nAssistant:"
@@ -363,6 +309,21 @@ def agent():
 
     # Step 1: Ask LLM which route to call
     route_decision = get_llm_route_decision(instruction)
+    # If LLM failed → Try again but include the failure context
+    if "error" in route_decision:
+        correction_prompt = f"""
+    You previously failed to generate correct route JSON.
+
+    Original User Instruction:
+    "{instruction}"
+
+    Your previous output:
+    {route_decision}
+
+    Fix your mistake and return ONLY corrected valid JSON (no markdown, no explanation).
+    """
+    route_decision = get_llm_route_decision(correction_prompt)
+
     if "error" in route_decision:
         return jsonify(route_decision), 500
 
@@ -384,23 +345,51 @@ def agent():
         )
         body["content"] = generated_content
     if endpoint == "/update-file":
-        generated_content = generate_code_from_llm(
-            f"""The user wants to UPDATE an existing file by ADDING meaningful content.
-        Generate additional content that logically continues, expands, or deepens the topic.
-        Do NOT repeat what might already exist. No intros like "I am adding text".
+        filename = body.get("filename")
+        # ✅ Step 1: Fetch existing file content
+        read_res = requests.get(
+            "http://localhost:5001/read-file", 
+            params={"filename": filename}
+        ).json()
 
-        Instruction: {instruction}
+        existing_content = read_res.get("content", "")
+
+        # ✅ Step 2: Generate improved continuation
+        generated_content = generate_code_from_llm(
+            f"""You are updating an existing file.
+
+        Existing file content:
+        ---------------------
+        {existing_content}
+        ---------------------
+
+        Instruction from user:
+        {instruction}
+
+        Task:
+        Add new content that meaningfully CONTINUES the topic.
+        - Do NOT repeat what already exists.
+        - Do NOT say "Here is the updated content".
+        - Keep tone and formatting consistent.
+        - Only return the new content to append.
         """
-        )
+            )
+
+        # ✅ Step 3: Set body to send to backend update routine
         body["content"] = generated_content
-    if endpoint == "/replace-content":
-        generated_content = generate_code_from_llm(
-            f"""The user wants to UPDATE an existing file by ADDING meaningful content.
-        Generate additional content that logically continues, expands, or deepens the topic.
-        Do NOT repeat what might already exist. No intros like "I am adding text".
 
-        Instruction: {instruction}
-        """
+    if endpoint == "/replace-content":
+        # First clear the file
+        requests.post("http://localhost:5001/clear-file", json={"filename": body.get("filename")})
+
+        # Then generate replacement content
+        generated_content = generate_code_from_llm(
+            f"""The user wants to REPLACE the content of the file completely.
+            Generate a full new version of the file content.
+            DO NOT reference previous version. Just output the final file body.
+
+            Instruction: {instruction}
+            """
         )
         body["new_content"] = generated_content
     else:

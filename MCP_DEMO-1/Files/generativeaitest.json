@@ -1,14 +1,22 @@
 {
+  "name": "Generative AI Test",
+  "description": "Testing the capabilities of generative AI models.",
   "realms": [
-    "oc1"
-  ],
-  "group": "generative-ai-agent",
-  "name": "agent-count",
-  "tenant_id": "ocid1.tenancy.oc1..aaaaaaaaumuuscymm6yb3wsbaicfx3mjhesghplvrvamvbypyehh5pgaasna",
-  "values": [
     {
-      "min": 0,
-      "max": 15
+      "id": "oc1",
+      "label": "Text Generation"
+    },
+    {
+      "id": "oc4",
+      "label": "Image Creation"
+    },
+    {
+      "id": "oc2",
+      "label": "Conversational Dialogue"
+    },
+    {
+      "id": "oc5",
+      "label": "Audio Generation"
     }
   ]
 }

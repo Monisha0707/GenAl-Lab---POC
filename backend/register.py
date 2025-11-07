@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
 from db import mongo
 from werkzeug.security import generate_password_hash
+
 register_bp = Blueprint("register", __name__)
 
-@register_bp.route('/register', methods=['POST'])
+
+@register_bp.route("/register", methods=["POST"])
 def register():
     try:
         data = request.json
@@ -14,11 +16,13 @@ def register():
             return jsonify({"error": "User already exists with this email"}), 400
 
         # Insert the new user
-        user_collection.insert_one({
-            "name": data["name"],
-            "email": data["email"],
-            "password": generate_password_hash(data["password"])
-        })
+        user_collection.insert_one(
+            {
+                "name": data["name"],
+                "email": data["email"],
+                "password": generate_password_hash(data["password"]),
+            }
+        )
 
         return jsonify({"message": "User registered successfully!"}), 201
 
