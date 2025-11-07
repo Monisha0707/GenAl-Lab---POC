@@ -37,9 +37,6 @@
 # CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 
-
-
-
 # # Root route
 # @app.route('/', methods=['GET'])
 # def index():
@@ -50,13 +47,13 @@
 # @app.route('/message', methods=['GET'])
 # def message():
 #     print("Incoming request to '/message' endpoint from React")  # Logs to the console
-#     return jsonify({"message": "Connected"}) 
+#     return jsonify({"message": "Connected"})
 
 # @app.route('/query', methods=['POST'])
 # def chat():
 #     data = request.get_json()  # Get the JSON data sent from the Java server
 #     prompt = data.get("message")  # Extract the prompt from the JSON
-    
+
 #     # Create a Cohere client and send the prompt to the chat model
 #     co = cohere.ClientV2("Y9yCkVlUkr2xZvRYrI5wwIj1CmWHWocax435rzWi")
 #     response = co.chat(
@@ -93,7 +90,7 @@
 #     global current_prompt
 #     if not current_prompt:
 #         return "No prompt available", 400
-    
+
 #     # Create a Cohere client and initialize the chat stream
 #     co = cohere.ClientV2("Y9yCkVlUkr2xZvRYrI5wwIj1CmWHWocax435rzWi")
 #     response = co.chat_stream(
@@ -168,7 +165,7 @@
 
 #     # Extract relevant documents based on their indices
 #     ranked_responses = [
-#         {"document": docs[item.index], "score": item.relevance_score} 
+#         {"document": docs[item.index], "score": item.relevance_score}
 #         for item in response.results if docs[item.index]  # Ensure the document exists
 #     ]
 
@@ -177,9 +174,6 @@
 
 #     # Limit the response to the top N relevant excerpts
 #     return jsonify(ranked_responses)
-
-
-
 
 
 # @app.route('/summarize-email', methods=['POST'])
@@ -193,7 +187,7 @@
 #     try:
 #         # Initialize Cohere client
 #         co = cohere.ClientV2("Y9yCkVlUkr2xZvRYrI5wwIj1CmWHWocax435rzWi")
-        
+
 #         # Use Cohere's Summarize model to summarize the email
 #         response = co.summarize(
 #             text=email_content,
@@ -211,7 +205,7 @@
 #     except Exception as e:
 #         print(f"Error summarizing email: {e}")
 #         return jsonify({"error": "Failed to summarize email."}), 500
-    
+
 
 # @app.route("/test")
 # def test():
@@ -243,14 +237,17 @@ from chatStore import chat_bp
 from embeddings.routes import embedding_bp
 from rag.routes import rag_bp  # ✅ New RAG blueprint import
 from rag.rag_chat_routes import rag_chat_bp
+
 app = Flask(__name__)
 
 # ✅ Enable CORS for frontend
-CORS(app,
-     resources={r"/*": {"origins": "http://localhost:5173"}},
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+CORS(
+    app,
+    resources={r"/*": {"origins": "http://localhost:5173"}},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+)
 
 # ✅ Initialize database
 init_db(app)

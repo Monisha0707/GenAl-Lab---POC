@@ -10,7 +10,8 @@ login_bp = Blueprint("login", __name__)
 # Secret key for encoding JWT (use a secure key in production)
 SECRET_KEY = "your_secret_key_here"
 
-@login_bp.route('/login', methods=['POST'])
+
+@login_bp.route("/login", methods=["POST"])
 def login():
     try:
         data = request.get_json()
@@ -29,18 +30,27 @@ def login():
             return jsonify({"error": "Incorrect password"}), 401
 
         # Create JWT token (expires in 1 hour)
-        token = jwt.encode({
-            "email": user["email"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-        }, SECRET_KEY, algorithm="HS256")
+        token = jwt.encode(
+            {
+                "email": user["email"],
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+            },
+            SECRET_KEY,
+            algorithm="HS256",
+        )
 
         # ✅ Include user ID in the response (convert ObjectId to string)
-        return jsonify({
-            "message": "Login successful!",
-            "token": token,
-            "email": user["email"],
-            "userID": str(user["_id"])
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Login successful!",
+                    "token": token,
+                    "email": user["email"],
+                    "userID": str(user["_id"]),
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

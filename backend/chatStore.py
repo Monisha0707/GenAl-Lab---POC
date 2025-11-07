@@ -60,7 +60,10 @@ def end_session(user, session_id):
     )
     return jsonify({"success": True, "message": "Session ended"}), 200
 
+
 app = Flask(__name__)
+
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     try:
@@ -90,7 +93,7 @@ def chat():
     except Exception as e:
         print(f"Error in /api/chat: {e}")
         return jsonify({"error": str(e)}), 500
-    
+
 
 @chat_bp.route("/api/chat/sessions/<user>", methods=["GET"])
 def get_all_sessions(user):
@@ -100,22 +103,26 @@ def get_all_sessions(user):
         print(sessions)
         print("testing")
         for s in sessions:
-            session_list.append({
-                "session_id": s.get("session_id"),
-                "created_at": s.get("created_at"),
-                "chat_history": s.get("chat_history", []),
-                "active": bool(s.get("active")),  # Ensure it's a boolean
-                "last_message": (
-                    s["chat_history"][-1].get("question", "")
-                    if s.get("chat_history") else ""
-                ),
-            })
+            session_list.append(
+                {
+                    "session_id": s.get("session_id"),
+                    "created_at": s.get("created_at"),
+                    "chat_history": s.get("chat_history", []),
+                    "active": bool(s.get("active")),  # Ensure it's a boolean
+                    "last_message": (
+                        s["chat_history"][-1].get("question", "")
+                        if s.get("chat_history")
+                        else ""
+                    ),
+                }
+            )
 
         return jsonify(session_list), 200
 
     except Exception as e:
         print(f"Error fetching sessions: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 @chat_bp.route("/api/chat/delete", methods=["DELETE"])
 def delete_chat_session():
@@ -129,6 +136,9 @@ def delete_chat_session():
     result = mongo.db.chat_sessions.delete_one({"user": user, "session_id": session_id})
 
     if result.deleted_count > 0:
-        return jsonify({"success": True, "message": "Chat session deleted successfully"}), 200
+        return (
+            jsonify({"success": True, "message": "Chat session deleted successfully"}),
+            200,
+        )
     else:
         return jsonify({"success": False, "message": "No matching session found"}), 404

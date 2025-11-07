@@ -1,5 +1,6 @@
 # schemas/user_schema.py
 
+
 def validate_user_data(data):
     if not data.get("name") or not isinstance(data.get("name"), str):
         return False, "Name is required and must be a string"

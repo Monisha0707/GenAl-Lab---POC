@@ -7,12 +7,13 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["expense_tracker"]
 expenses_collection = db["user_expenses"]
 
-expense_routes = Blueprint('expense_routes', __name__)
+expense_routes = Blueprint("expense_routes", __name__)
+
 
 @expense_routes.route("/add-expense", methods=["POST"])
 def add_expense():
     data = request.get_json()
-    print("Received data:", data) 
+    print("Received data:", data)
     # Validate required fields
     required_fields = ["userID", "amount", "type", "place", "date"]
     for field in required_fields:
@@ -28,7 +29,7 @@ def add_expense():
         "specification": data.get("specification", ""),
         "place": data["place"],
         "date": data["date"],
-        "timestamp": datetime.utcnow()
+        "timestamp": datetime.utcnow(),
     }
 
     # Check if user already has an entry in the table
@@ -37,14 +38,10 @@ def add_expense():
     if existing_user:
         # Update existing document by appending to 'expenses' array
         expenses_collection.update_one(
-            {"userID": user_id},
-            {"$push": {"expenses": new_expense}}
+            {"userID": user_id}, {"$push": {"expenses": new_expense}}
         )
     else:
         # Create new document for this user
-        expenses_collection.insert_one({
-            "userID": user_id,
-            "expenses": [new_expense]
-        })
+        expenses_collection.insert_one({"userID": user_id, "expenses": [new_expense]})
 
     return jsonify({"message": "Expense added successfully!"}), 200

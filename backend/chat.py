@@ -4,6 +4,7 @@ from db import mongo
 
 chat_bp = Blueprint("chat", __name__)
 
+
 @chat_bp.route("/localChat", methods=["POST"])
 def save_chat():
     print("save_chat")
@@ -16,26 +17,29 @@ def save_chat():
         if not email or not user_message or not bot_response:
             return jsonify({"error": "Missing fields"}), 400
 
-        today = datetime.utcnow().strftime('%Y-%m-%d')
+        today = datetime.utcnow().strftime("%Y-%m-%d")
         collection = mongo.db.chat_history
 
         # Append messages to the correct day's document
         result = collection.update_one(
             {"email": email, "date": today},
-            {"$push": {
-                "messages": {
-                    "$each": [
-                        {"role": "user", "text": user_message},
-                        {"role": "bot", "text": bot_response}
-                    ]
+            {
+                "$push": {
+                    "messages": {
+                        "$each": [
+                            {"role": "user", "text": user_message},
+                            {"role": "bot", "text": bot_response},
+                        ]
+                    }
                 }
-            }},
-            upsert=True
+            },
+            upsert=True,
         )
 
         return jsonify({"message": "Chat saved"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @chat_bp.route("/localChat/history", methods=["POST"])
 def get_local_chat_history():
@@ -51,8 +55,7 @@ def get_local_chat_history():
         print(f"Fetching history for email: {email}, date: {today}")
 
         history = mongo.db.chat_history.find_one(
-            {"email": email, "date": today},
-            {"_id": 0, "messages": 1}
+            {"email": email, "date": today}, {"_id": 0, "messages": 1}
         )
 
         if not history:

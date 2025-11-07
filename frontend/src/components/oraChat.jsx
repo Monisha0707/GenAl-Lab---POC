@@ -395,7 +395,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
             {/* Input area */}
             <form
               onSubmit={handleSubmit}
-              className="mt-2 flex items-center border border-gray-700 rounded-lg bg-gray-800 focus-within:ring-2 focus-within:ring-teal-400"
+              className="mt-2 flex items-center border border-gray-700 rounded-lg bg-gray-800 focus-within:ring-2 focus-within:ring-teal-400 rounded-4xl "
             >
               <textarea
                 value={prompt}
@@ -406,7 +406,7 @@ Respond naturally, emotionally, and intelligently, adapting your tone based on w
                     handleSubmit(e);
                   }
                 }}
-                className="flex-1 p-2 bg-transparent text-white resize-none border border-gray-700 focus:outline-none placeholder-gray-400"
+                className="flex-1 p-2 bg-transparent text-white resize-none border border-gray-700 focus:outline-none placeholder-gray-400 "
                 rows={1}
                 placeholder="Ask something..."
                 disabled={loading}
